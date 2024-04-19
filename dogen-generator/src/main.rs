@@ -7,6 +7,9 @@ fn main() {
     let place_names = csv_file
         .lines()
         .filter_map(|line| {
+            if line.is_empty() {
+                return None;
+            }
             let split = line.split(',');
             let phrases = split
                 .last()
