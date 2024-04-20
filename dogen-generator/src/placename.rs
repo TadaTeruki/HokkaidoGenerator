@@ -97,7 +97,7 @@ mod tests {
 
     #[test]
     fn test_name_generator() {
-        let csv_file = include_str!("../../dataset/placenames.csv");
+        let csv_file = include_str!("../dataset/placenames.csv");
         let mut generator = NameGenerator::new(csv_file, 0);
         (0..1000).for_each(|_| {
             if let Some((name, pronunciation)) = generator.generate(NameConfig {
