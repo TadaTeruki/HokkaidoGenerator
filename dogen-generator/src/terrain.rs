@@ -17,11 +17,11 @@ use fastlem::{
 use noise::{NoiseFn, Perlin};
 use terrain_graph::edge_attributed_undirected::EdgeAttributedUndirectedGraph;
 
-pub struct TerrainProvider {
+pub struct Terrain {
     terrain: Terrain2D,
 }
 
-impl TerrainProvider {
+impl Terrain {
     pub fn new(config: TerrainConfig) -> Result<Self, Box<dyn std::error::Error>> {
         // Seed of the noise generator.
         // You can generate various terrains by changing the seed.
