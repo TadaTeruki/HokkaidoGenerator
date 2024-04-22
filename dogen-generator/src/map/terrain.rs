@@ -1,3 +1,12 @@
+use fastlem::{
+    core::{parameters::TopographicalParameters, traits::Model},
+    models::surface::{
+        builder::TerrainModel2DBulider, model::TerrainModel2D, sites::Site2D, terrain::Terrain2D,
+    },
+};
+use noise::{NoiseFn, Perlin};
+use terrain_graph::edge_attributed_undirected::EdgeAttributedUndirectedGraph;
+
 pub struct TerrainConfig {
     pub bound_width: f64,
     pub bound_height: f64,
@@ -10,26 +19,15 @@ pub struct TerrainConfig {
     pub global_max_slope: f64,
 }
 
-use fastlem::{
-    core::{parameters::TopographicalParameters, traits::Model},
-    models::surface::{builder::TerrainModel2DBulider, sites::Site2D, terrain::Terrain2D},
-};
-use noise::{NoiseFn, Perlin};
-use terrain_graph::edge_attributed_undirected::EdgeAttributedUndirectedGraph;
-
-pub struct Terrain {
-    terrain: Terrain2D,
+pub struct TerrainBuilder {
+    config: TerrainConfig,
+    model: TerrainModel2D,
+    bound_min: Site2D,
+    bound_max: Site2D,
 }
 
-impl Terrain {
+impl TerrainBuilder {
     pub fn new(config: TerrainConfig) -> Result<Self, Box<dyn std::error::Error>> {
-        // Seed of the noise generator.
-        // You can generate various terrains by changing the seed.
-        let seed = config.seed;
-
-        // Noise generator
-        let perlin = Perlin::new(seed);
-
         let bound_min = Site2D {
             x: -config.bound_width / 2.0,
             y: -config.bound_height / 2.0,
@@ -39,33 +37,54 @@ impl Terrain {
             y: config.bound_height / 2.0,
         };
 
-        let bound_range = Site2D {
-            x: bound_max.x - bound_min.x,
-            y: bound_max.y - bound_min.y,
-        };
-
         let model =
             TerrainModel2DBulider::from_random_sites(config.particle_num, bound_min, bound_max)
                 .relaxate_sites(2)?
                 .add_edge_sites(None, None)?
                 .build()?;
 
+        Ok(Self {
+            config,
+            model,
+            bound_min,
+            bound_max,
+        })
+    }
+
+    pub fn get_model(&self) -> &TerrainModel2D {
+        &self.model
+    }
+
+    pub fn build(&self) -> Result<Terrain2D, Box<dyn std::error::Error>> {
+        // Seed of the noise generator.
+        // You can generate various terrains by changing the seed.
+        let seed = self.config.seed;
+
+        // Noise generator
+        let perlin = Perlin::new(seed);
+
+        let bound_range = Site2D {
+            x: self.bound_max.x - self.bound_min.x,
+            y: self.bound_max.y - self.bound_min.y,
+        };
+
         // count edge sites
-        let edge_sites_len = model
+        let edge_sites_len = self
+            .model
             .sites()
             .iter()
             .filter(|site| {
-                site.x == bound_min.x
-                    || site.x == bound_max.x
-                    || site.y == bound_min.y
-                    || site.y == bound_max.y
+                site.x == self.bound_min.x
+                    || site.x == self.bound_max.x
+                    || site.y == self.bound_min.y
+                    || site.y == self.bound_max.y
             })
             .count();
 
-        let sites = model.sites().to_vec();
+        let sites = self.model.sites().to_vec();
 
         // fault
-        let fault_scale = config.fault_scale;
+        let fault_scale = self.config.fault_scale;
 
         let get_fault = |site: &Site2D| -> (f64, f64) {
             let scale = 100.0;
@@ -102,7 +121,7 @@ impl Terrain {
             }
         };
 
-        let land_bias = -(inversed_perlin_noise_curve(config.land_ratio) - 0.5);
+        let land_bias = -(inversed_perlin_noise_curve(self.config.land_ratio) - 0.5);
 
         let base_is_outlet = {
             sites
@@ -147,18 +166,18 @@ impl Terrain {
         };
 
         let start_index = ((sites.len() - edge_sites_len)..sites.len()).collect::<Vec<_>>();
-        let graph = model.graph();
+        let graph = self.model.graph();
 
         let is_outlet = determine_outlets(
             &sites,
             base_is_outlet,
             start_index,
             graph,
-            config.convex_hull_is_always_outlet,
+            self.config.convex_hull_is_always_outlet,
         )
         .ok_or("No outlet found")?;
 
-        let erodibility_distribution_power = config.erodibility_distribution_power;
+        let erodibility_distribution_power = self.config.erodibility_distribution_power;
         let parameters = {
             sites
                 .iter()
@@ -183,17 +202,17 @@ impl Terrain {
                     TopographicalParameters::default()
                         .set_erodibility(noise_erodibility)
                         .set_is_outlet(is_outlet[i])
-                        .set_max_slope(Some(config.global_max_slope))
+                        .set_max_slope(Some(self.config.global_max_slope))
                 })
                 .collect::<Vec<TopographicalParameters>>()
         };
 
         let terrain = fastlem::lem::generator::TerrainGenerator::default()
-            .set_model(model)
+            .set_model(self.model.clone())
             .set_parameters(parameters)
             .generate()?;
 
-        Ok(Self { terrain })
+        Ok(terrain)
     }
 }
 
