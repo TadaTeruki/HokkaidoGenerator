@@ -8,8 +8,8 @@ use noise::{NoiseFn, Perlin};
 use terrain_graph::edge_attributed_undirected::EdgeAttributedUndirectedGraph;
 
 pub struct TerrainConfig {
-    pub bound_width: f64,
-    pub bound_height: f64,
+    pub bound_min: Site2D,
+    pub bound_max: Site2D,
     pub seed: u32,
     pub particle_num: usize,
     pub fault_scale: f64,
@@ -22,33 +22,20 @@ pub struct TerrainConfig {
 pub(crate) struct TerrainBuilder {
     config: TerrainConfig,
     model: TerrainModel2D,
-    bound_min: Site2D,
-    bound_max: Site2D,
 }
 
 impl TerrainBuilder {
     pub fn new(config: TerrainConfig) -> Result<Self, Box<dyn std::error::Error>> {
-        let bound_min = Site2D {
-            x: -config.bound_width / 2.0,
-            y: -config.bound_height / 2.0,
-        };
-        let bound_max = Site2D {
-            x: config.bound_width / 2.0,
-            y: config.bound_height / 2.0,
-        };
+        let model = TerrainModel2DBulider::from_random_sites(
+            config.particle_num,
+            config.bound_min,
+            config.bound_max,
+        )
+        .relaxate_sites(2)?
+        .add_edge_sites(None, None)?
+        .build()?;
 
-        let model =
-            TerrainModel2DBulider::from_random_sites(config.particle_num, bound_min, bound_max)
-                .relaxate_sites(2)?
-                .add_edge_sites(None, None)?
-                .build()?;
-
-        Ok(Self {
-            config,
-            model,
-            bound_min,
-            bound_max,
-        })
+        Ok(Self { config, model })
     }
 
     pub fn get_model(&self) -> &TerrainModel2D {
@@ -64,8 +51,8 @@ impl TerrainBuilder {
         let perlin = Perlin::new(seed);
 
         let bound_range = Site2D {
-            x: self.bound_max.x - self.bound_min.x,
-            y: self.bound_max.y - self.bound_min.y,
+            x: self.config.bound_max.x - self.config.bound_min.x,
+            y: self.config.bound_max.y - self.config.bound_min.y,
         };
 
         // count edge sites
@@ -74,10 +61,10 @@ impl TerrainBuilder {
             .sites()
             .iter()
             .filter(|site| {
-                site.x == self.bound_min.x
-                    || site.x == self.bound_max.x
-                    || site.y == self.bound_min.y
-                    || site.y == self.bound_max.y
+                site.x == self.config.bound_min.x
+                    || site.x == self.config.bound_max.x
+                    || site.y == self.config.bound_min.y
+                    || site.y == self.config.bound_max.y
             })
             .count();
 

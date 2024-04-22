@@ -10,7 +10,7 @@ pub struct Map {
 }
 
 impl Map {
-    pub fn new(
+    pub(crate) fn new(
         terrain: Terrain2D,
         population_densities: Vec<f64>,
         interpolator: Interpolator,
