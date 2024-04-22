@@ -1,36 +1,41 @@
 use fastlem::{core::traits::Model, models::surface::terrain::Terrain2D};
 use naturalneighbor::Interpolator;
+use rand::SeedableRng;
 use street_engine::{
-    core::geometry::site::Site,
-    transport::traits::{RandomF64Provider, TransportRulesProvider},
+    core::{
+        container::path_network::PathNetwork,
+        geometry::{angle::Angle, site::Site},
+        Stage,
+    },
+    transport::{
+        builder::TransportBuilder,
+        node::TransportNode,
+        rules::TransportRules,
+        traits::{RandomF64Provider, TransportRulesProvider},
+    },
 };
 use terrain_graph::edge_attributed_undirected::EdgeAttributedUndirectedGraph;
 
-use super::terrain::{TerrainBuilder, TerrainConfig};
+use super::{
+    map::Map,
+    terrain::{TerrainBuilder, TerrainConfig},
+};
 
 pub struct MapConfig {
     sea_level: f64,
     max_slope_livable: f64,
 }
 
-pub struct MapProvider<T>
-where
-    T: TransportRulesProvider,
-{
+pub struct MapGenerator {
     terrain: Terrain2D,
     population_densities: Vec<f64>,
     interpolator: Interpolator,
-    transport_rules_provider: T,
     map_config: MapConfig,
 }
 
-impl<T> MapProvider<T>
-where
-    T: TransportRulesProvider,
-{
+impl MapGenerator {
     fn new(
         terrain_config: TerrainConfig,
-        transport_rules_provider: T,
         map_config: MapConfig,
     ) -> Result<Self, Box<dyn std::error::Error>> {
         let terrain_builder = TerrainBuilder::new(terrain_config)?;
@@ -45,9 +50,31 @@ where
             terrain,
             population_densities,
             interpolator,
-            transport_rules_provider,
             map_config,
         })
+    }
+
+    fn build(self) -> Result<Map, Box<dyn std::error::Error>> {
+        let mut rnd = RandomF64::new(rand::rngs::StdRng::seed_from_u64(0));
+
+        let network = TransportBuilder::new(&self)
+            .add_origin(Site { x: 0.0, y: 0.0 }, 0.0, None)
+            .ok_or("Failed to add origin")?
+            .iterate_as_possible(&mut rnd)
+            .build();
+
+        Ok(Map::new(
+            self.terrain,
+            self.population_densities,
+            self.interpolator,
+            network,
+        ))
+    }
+}
+
+impl TransportRulesProvider for MapGenerator {
+    fn get_rules(&self, site_end: &Site, angle: Angle, stage: Stage) -> Option<TransportRules> {
+        None
     }
 }
 

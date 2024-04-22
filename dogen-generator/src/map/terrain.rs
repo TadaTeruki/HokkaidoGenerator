@@ -19,7 +19,7 @@ pub struct TerrainConfig {
     pub global_max_slope: f64,
 }
 
-pub struct TerrainBuilder {
+pub(crate) struct TerrainBuilder {
     config: TerrainConfig,
     model: TerrainModel2D,
     bound_min: Site2D,
@@ -55,7 +55,7 @@ impl TerrainBuilder {
         &self.model
     }
 
-    pub fn build(&self) -> Result<Terrain2D, Box<dyn std::error::Error>> {
+    pub fn build(self) -> Result<Terrain2D, Box<dyn std::error::Error>> {
         // Seed of the noise generator.
         // You can generate various terrains by changing the seed.
         let seed = self.config.seed;
@@ -208,7 +208,7 @@ impl TerrainBuilder {
         };
 
         let terrain = fastlem::lem::generator::TerrainGenerator::default()
-            .set_model(self.model.clone())
+            .set_model(self.model)
             .set_parameters(parameters)
             .generate()?;
 
