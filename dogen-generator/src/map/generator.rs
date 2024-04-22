@@ -3,13 +3,11 @@ use naturalneighbor::Interpolator;
 use rand::SeedableRng;
 use street_engine::{
     core::{
-        container::path_network::PathNetwork,
         geometry::{angle::Angle, site::Site},
         Stage,
     },
     transport::{
         builder::TransportBuilder,
-        node::TransportNode,
         rules::TransportRules,
         traits::{RandomF64Provider, TransportRulesProvider},
     },
@@ -31,12 +29,22 @@ pub struct MapGenerator {
     population_densities: Vec<f64>,
     interpolator: Interpolator,
     map_config: MapConfig,
+    rules_fn: TransportRulesFn,
 }
+
+pub type TransportRulesFn = fn(
+    elevation: f64,
+    population_density: f64,
+    site: &Site,
+    angle: Angle,
+    stage: Stage,
+) -> Option<TransportRules>;
 
 impl MapGenerator {
     fn new(
         terrain_config: TerrainConfig,
         map_config: MapConfig,
+        rules_fn: TransportRulesFn,
     ) -> Result<Self, Box<dyn std::error::Error>> {
         let terrain_builder = TerrainBuilder::new(terrain_config)?;
         let model = terrain_builder.get_model().clone();
@@ -51,6 +59,7 @@ impl MapGenerator {
             population_densities,
             interpolator,
             map_config,
+            rules_fn,
         })
     }
 
@@ -73,8 +82,23 @@ impl MapGenerator {
 }
 
 impl TransportRulesProvider for MapGenerator {
-    fn get_rules(&self, site_end: &Site, angle: Angle, stage: Stage) -> Option<TransportRules> {
-        None
+    fn get_rules(&self, site: &Site, angle: Angle, stage: Stage) -> Option<TransportRules> {
+        let elevation = self.terrain.get_elevation(&into_fastlem_site(*site))?;
+        let population_density = self
+            .interpolator
+            .interpolate(
+                &self.population_densities,
+                naturalneighbor::Point {
+                    x: site.x,
+                    y: site.y,
+                },
+            )
+            .unwrap_or(None)?;
+        if elevation < self.map_config.sea_level {
+            return None;
+        }
+
+        (self.rules_fn)(elevation, population_density, site, angle, stage)
     }
 }
 
@@ -106,7 +130,6 @@ fn calculate_population_density(
     graph: &EdgeAttributedUndirectedGraph<f64>,
     map_config: &MapConfig,
 ) -> Vec<f64> {
-    //let max_slope_livable = std::f64::consts::PI / 3.0;
     let slopes = (0..terrain.sites().len())
         .map(|i| {
             let slopes = graph
