@@ -1,2 +1,2 @@
-mod provider;
+pub mod provider;
 mod terrain;

@@ -50,8 +50,10 @@ version = "0.1.0"
 dependencies = [
  "fastlem",
  "name-engine",
+ "naturalneighbor",
  "noise",
  "rand",
+ "street-engine",
  "terrain-graph",
 ]
 
@@ -90,15 +92,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "hash32"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "47d60b12902ba28e2730cd37e95b8c9223af2808df9e902d4df49588d1470606"
+dependencies = [
+ "byteorder",
+]
+
+[[package]]
 name = "heapless"
 version = "0.7.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cdc6457c0eb62c71aac4bc17216026d8410337c4126773b9c5daba343f17964f"
 dependencies = [
  "atomic-polyfill",
- "hash32",
+ "hash32 0.2.1",
  "rustc_version",
  "spin",
+ "stable_deref_trait",
+]
+
+[[package]]
+name = "heapless"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0bfb9eb618601c89945a70e254898da93b13be0388091d42117462b265bb3fad"
+dependencies = [
+ "hash32 0.3.1",
  "stable_deref_trait",
 ]
 
@@ -140,7 +161,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ae3f8b30988d72ebb9e5d78926482da8cbcdc847bcee45f1f0c8b5c3bf954dab"
 dependencies = [
  "delaunator",
- "rstar",
+ "rstar 0.11.0",
  "thiserror",
 ]
 
@@ -246,7 +267,18 @@ version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "73111312eb7a2287d229f06c00ff35b51ddee180f017ab6dec1f69d62ac098d6"
 dependencies = [
- "heapless",
+ "heapless 0.7.17",
+ "num-traits",
+ "smallvec",
+]
+
+[[package]]
+name = "rstar"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "133315eb94c7b1e8d0cb097e5a710d850263372fd028fff18969de708afc7008"
+dependencies = [
+ "heapless 0.8.0",
  "num-traits",
  "smallvec",
 ]
@@ -301,6 +333,15 @@ name = "stable_deref_trait"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
+
+[[package]]
+name = "street-engine"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1b79185e1344473a16f6c43ec48817f311a585de5c5037192b82b9fafc8a34cc"
+dependencies = [
+ "rstar 0.12.0",
+]
 
 [[package]]
 name = "syn"

@@ -1,25 +1,19 @@
 use fastlem::{core::traits::Model, models::surface::terrain::Terrain2D};
 use naturalneighbor::Interpolator;
 use street_engine::{
-    core::{
-        geometry::{angle::Angle, site::Site},
-        Stage,
-    },
-    transport::{
-        rules::{BranchRules, PathDirectionRules, TransportRules},
-        traits::{RandomF64Provider, TransportRulesProvider},
-    },
+    core::geometry::site::Site,
+    transport::traits::{RandomF64Provider, TransportRulesProvider},
 };
 use terrain_graph::edge_attributed_undirected::EdgeAttributedUndirectedGraph;
 
 use super::terrain::{TerrainBuilder, TerrainConfig};
 
-struct MapConfig {
+pub struct MapConfig {
     sea_level: f64,
     max_slope_livable: f64,
 }
 
-struct MapProvider<T>
+pub struct MapProvider<T>
 where
     T: TransportRulesProvider,
 {
@@ -57,7 +51,7 @@ where
     }
 }
 
-struct RandomF64<R> {
+pub struct RandomF64<R> {
     rng: R,
 }
 
