@@ -15,36 +15,40 @@ use street_engine::{
 use terrain_graph::edge_attributed_undirected::EdgeAttributedUndirectedGraph;
 
 use super::{
-    map::Map,
     terrain::{TerrainBuilder, TerrainConfig},
+    Map,
 };
 
 pub struct MapConfig {
-    sea_level: f64,
-    max_slope_livable: f64,
+    pub sea_level: f64,
+    pub max_slope_livable: f64,
 }
 
-pub struct MapGenerator {
+pub struct MapGenerator<TF>
+where
+    TF: Fn(
+        f64,   // elevation
+        f64,   // population_density
+        Site,  // site
+        Angle, // angle
+        Stage, // stage
+    ) -> Option<TransportRules>,
+{
     terrain: Terrain2D,
     population_densities: Vec<f64>,
     interpolator: Interpolator,
     map_config: MapConfig,
-    rules_fn: TransportRulesFn,
+    rules_fn: TF,
 }
 
-pub type TransportRulesFn = fn(
-    elevation: f64,
-    population_density: f64,
-    site: &Site,
-    angle: Angle,
-    stage: Stage,
-) -> Option<TransportRules>;
-
-impl MapGenerator {
-    fn new(
+impl<TF> MapGenerator<TF>
+where
+    TF: Fn(f64, f64, Site, Angle, Stage) -> Option<TransportRules>,
+{
+    pub fn new(
         terrain_config: TerrainConfig,
         map_config: MapConfig,
-        rules_fn: TransportRulesFn,
+        rules_fn: TF,
     ) -> Result<Self, Box<dyn std::error::Error>> {
         let terrain_builder = TerrainBuilder::new(terrain_config)?;
         let model = terrain_builder.get_model().clone();
@@ -63,7 +67,7 @@ impl MapGenerator {
         })
     }
 
-    fn build(self) -> Result<Map, Box<dyn std::error::Error>> {
+    pub fn build(self) -> Result<Map, Box<dyn std::error::Error>> {
         let mut rnd = RandomF64::new(rand::rngs::StdRng::seed_from_u64(0));
 
         let network = TransportBuilder::new(&self)
@@ -81,7 +85,10 @@ impl MapGenerator {
     }
 }
 
-impl TransportRulesProvider for MapGenerator {
+impl<TF> TransportRulesProvider for MapGenerator<TF>
+where
+    TF: Fn(f64, f64, Site, Angle, Stage) -> Option<TransportRules>,
+{
     fn get_rules(&self, site: &Site, angle: Angle, stage: Stage) -> Option<TransportRules> {
         let elevation = self.terrain.get_elevation(&into_fastlem_site(*site))?;
         let population_density = self
@@ -98,7 +105,7 @@ impl TransportRulesProvider for MapGenerator {
             return None;
         }
 
-        (self.rules_fn)(elevation, population_density, site, angle, stage)
+        (self.rules_fn)(elevation, population_density, *site, angle, stage)
     }
 }
 

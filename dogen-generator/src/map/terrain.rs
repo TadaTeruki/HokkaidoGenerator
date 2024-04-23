@@ -16,10 +16,10 @@ pub struct TerrainConfig {
     pub erodibility_distribution_power: f64,
     pub land_ratio: f64,
     pub convex_hull_is_always_outlet: bool,
-    pub global_max_slope: f64,
+    pub global_max_slope: Option<f64>,
 }
 
-pub(crate) struct TerrainBuilder {
+pub struct TerrainBuilder {
     config: TerrainConfig,
     model: TerrainModel2D,
 }
@@ -189,7 +189,7 @@ impl TerrainBuilder {
                     TopographicalParameters::default()
                         .set_erodibility(noise_erodibility)
                         .set_is_outlet(is_outlet[i])
-                        .set_max_slope(Some(self.config.global_max_slope))
+                        .set_max_slope(self.config.global_max_slope)
                 })
                 .collect::<Vec<TopographicalParameters>>()
         };
