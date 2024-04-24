@@ -3,27 +3,30 @@ pub mod terrain;
 
 use fastlem::models::surface::terrain::Terrain2D;
 use naturalneighbor::Interpolator;
-use street_engine::{core::container::path_network::PathNetwork, transport::node::TransportNode};
+use street_engine::{
+    core::{container::path_network::PathNetwork, geometry::site::Site},
+    transport::node::TransportNode,
+};
 
 pub struct Map {
     pub terrain: Terrain2D,
-    pub population_densities: Vec<f64>,
     pub interpolator: Interpolator,
     pub network: PathNetwork<TransportNode>,
+    pub origin: Site,
 }
 
 impl Map {
     pub fn new(
         terrain: Terrain2D,
-        population_densities: Vec<f64>,
         interpolator: Interpolator,
         network: PathNetwork<TransportNode>,
+        origin: Site,
     ) -> Self {
         Self {
             terrain,
-            population_densities,
             interpolator,
             network,
+            origin,
         }
     }
 }

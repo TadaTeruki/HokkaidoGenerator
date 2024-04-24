@@ -7,9 +7,9 @@ use fastlem::{
 use noise::{NoiseFn, Perlin};
 use terrain_graph::edge_attributed_undirected::EdgeAttributedUndirectedGraph;
 
+#[derive(Debug, Clone)]
 pub struct TerrainConfig {
-    pub bound_min: Site2D,
-    pub bound_max: Site2D,
+    pub bound: f64,
     pub seed: u32,
     pub particle_num: usize,
     pub fault_scale: f64,
@@ -17,6 +17,36 @@ pub struct TerrainConfig {
     pub land_ratio: f64,
     pub convex_hull_is_always_outlet: bool,
     pub global_max_slope: Option<f64>,
+}
+
+impl TerrainConfig {
+    pub fn bound_min(&self) -> Site2D {
+        Site2D {
+            x: -self.bound / 2.0,
+            y: -self.bound / 2.0,
+        }
+    }
+
+    pub fn bound_max(&self) -> Site2D {
+        Site2D {
+            x: self.bound / 2.0,
+            y: self.bound / 2.0,
+        }
+    }
+
+    pub fn half_bound_min(&self) -> Site2D {
+        Site2D {
+            x: -self.bound / 4.0,
+            y: -self.bound / 4.0,
+        }
+    }
+
+    pub fn half_bound_max(&self) -> Site2D {
+        Site2D {
+            x: self.bound / 4.0,
+            y: self.bound / 4.0,
+        }
+    }
 }
 
 pub struct TerrainBuilder {
@@ -28,8 +58,8 @@ impl TerrainBuilder {
     pub fn new(config: TerrainConfig) -> Result<Self, Box<dyn std::error::Error>> {
         let model = TerrainModel2DBulider::from_random_sites(
             config.particle_num,
-            config.bound_min,
-            config.bound_max,
+            config.bound_min(),
+            config.bound_max(),
         )
         .relaxate_sites(2)?
         .add_edge_sites(None, None)?
@@ -50,9 +80,12 @@ impl TerrainBuilder {
         // Noise generator
         let perlin = Perlin::new(seed);
 
+        let bound_min = self.config.bound_min();
+        let bound_max = self.config.bound_max();
+
         let bound_range = Site2D {
-            x: self.config.bound_max.x - self.config.bound_min.x,
-            y: self.config.bound_max.y - self.config.bound_min.y,
+            x: bound_max.x - bound_min.x,
+            y: bound_max.y - bound_min.y,
         };
 
         // count edge sites
@@ -61,10 +94,10 @@ impl TerrainBuilder {
             .sites()
             .iter()
             .filter(|site| {
-                site.x == self.config.bound_min.x
-                    || site.x == self.config.bound_max.x
-                    || site.y == self.config.bound_min.y
-                    || site.y == self.config.bound_max.y
+                site.x == bound_min.x
+                    || site.x == bound_max.x
+                    || site.y == bound_min.y
+                    || site.y == bound_max.y
             })
             .count();
 

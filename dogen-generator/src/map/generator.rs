@@ -1,4 +1,7 @@
-use fastlem::{core::traits::Model, models::surface::terrain::Terrain2D};
+use fastlem::{
+    core::traits::Model,
+    models::surface::{sites::Site2D, terrain::Terrain2D},
+};
 use naturalneighbor::Interpolator;
 use rand::SeedableRng;
 use street_engine::{
@@ -19,9 +22,14 @@ use super::{
     Map,
 };
 
+#[derive(Debug, Clone)]
 pub struct MapConfig {
     pub sea_level: f64,
     pub max_slope_livable: f64,
+    pub origin_sample_num: usize,
+    pub origin_min_evelation: f64,
+    pub initial_angle: f64,
+    pub city_size_prop: f64,
 }
 
 pub struct MapGenerator<TF>
@@ -38,6 +46,7 @@ where
     population_densities: Vec<f64>,
     interpolator: Interpolator,
     map_config: MapConfig,
+    origin_site: Site,
     rules_fn: TF,
 }
 
@@ -50,11 +59,40 @@ where
         map_config: MapConfig,
         rules_fn: TF,
     ) -> Result<Self, Box<dyn std::error::Error>> {
-        let terrain_builder = TerrainBuilder::new(terrain_config)?;
+        println!("Creating terrain...");
+        let terrain_builder = TerrainBuilder::new(terrain_config.clone())?;
         let model = terrain_builder.get_model().clone();
         let terrain = terrain_builder.build()?;
-        let population_densities =
-            calculate_population_density(&terrain, model.graph(), &map_config);
+
+        let mut rnd = RandomF64::new(rand::rngs::StdRng::seed_from_u64(0));
+
+        let half_bound_min = terrain_config.half_bound_min();
+        let half_bound_max = terrain_config.half_bound_max();
+
+        let origin_site = (0..map_config.origin_sample_num)
+            .map(|_| {
+                let x = rnd.gen_f64() * (half_bound_max.x - half_bound_min.x) + half_bound_min.x;
+                let y = rnd.gen_f64() * (half_bound_max.y - half_bound_min.y) + half_bound_min.y;
+                Site { x, y }
+            })
+            .filter_map(|site| {
+                let elevation = terrain.get_elevation(&into_fastlem_site(site))?;
+                if elevation < map_config.origin_min_evelation {
+                    return None;
+                }
+                Some((site, elevation))
+            })
+            .min_by(|a, b| a.1.partial_cmp(&b.1).unwrap())
+            .ok_or("Failed to find origin site")?
+            .0;
+
+        let population_densities = calculate_population_density(
+            &terrain,
+            origin_site,
+            &terrain_config,
+            model.graph(),
+            &map_config,
+        );
 
         let interpolator = Interpolator::new(terrain.sites());
 
@@ -63,6 +101,7 @@ where
             population_densities,
             interpolator,
             map_config,
+            origin_site,
             rules_fn,
         })
     }
@@ -70,17 +109,20 @@ where
     pub fn build(self) -> Result<Map, Box<dyn std::error::Error>> {
         let mut rnd = RandomF64::new(rand::rngs::StdRng::seed_from_u64(0));
 
+        println!("Creating transport network...");
         let network = TransportBuilder::new(&self)
-            .add_origin(Site { x: 0.0, y: 0.0 }, 0.0, None)
+            .add_origin(self.origin_site, self.map_config.initial_angle, None)
             .ok_or("Failed to add origin")?
             .iterate_as_possible(&mut rnd)
             .build();
 
+        println!("Map generation completed.");
+
         Ok(Map::new(
             self.terrain,
-            self.population_densities,
             self.interpolator,
             network,
+            self.origin_site,
         ))
     }
 }
@@ -134,6 +176,8 @@ fn into_fastlem_site(site: Site) -> fastlem::models::surface::sites::Site2D {
 
 fn calculate_population_density(
     terrain: &Terrain2D,
+    origin_site: Site,
+    terrain_config: &TerrainConfig,
     graph: &EdgeAttributedUndirectedGraph<f64>,
     map_config: &MapConfig,
 ) -> Vec<f64> {
@@ -157,13 +201,27 @@ fn calculate_population_density(
         .map(|i| {
             let elevation = terrain.elevations()[i];
             if elevation < map_config.sea_level {
-                return 0.0;
+                return (i, 0.0);
             }
             let slope_sum = slopes[i].iter().fold(0.0, |acc, slope| acc + slope.abs());
             let slope_avg = slope_sum.abs() / slopes[i].len() as f64;
-            (1.0 - slope_avg / map_config.max_slope_livable)
+            let density = (1.0 - slope_avg / map_config.max_slope_livable)
                 .max(0.0)
+                .min(1.0);
+            (i, density)
+        })
+        .map(|(i, density)| {
+            // distance between origin and site
+            let site = terrain.sites()[i];
+            let distance = origin_site.distance(&Site {
+                x: site.x,
+                y: site.y,
+            });
+            let dprop = (1.0 - distance / (terrain_config.bound * map_config.city_size_prop))
                 .min(1.0)
+                .max(0.0);
+            let density = density * dprop;
+            density
         })
         .collect::<Vec<_>>();
 
