@@ -2,7 +2,6 @@ use fastlem::models::surface::sites::Site2D;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use street_engine::{
     core::{
-        container::path_network::NodeId,
         geometry::{angle::Angle, site::Site},
         Stage,
     },
@@ -11,6 +10,7 @@ use street_engine::{
         rules::{BranchRules, PathDirectionRules, TransportRules},
     },
 };
+use wasm_bindgen::prelude::*;
 
 use crate::{
     map::{
@@ -21,14 +21,62 @@ use crate::{
     placename::{NameConfig, NameGenerator},
 };
 
-pub struct NameSet {
-    pub city_name: (String, String),
-    pub county_name: (String, String),
-    pub subprefecture_name: (String, String),
-    pub subprefecture_postfix: (String, String),
-    pub government: (String, String),
+#[wasm_bindgen]
+#[derive(Debug, Clone)]
+
+pub struct Name {
+    name: String,
+    reading: String,
 }
 
+impl Name {
+    fn from_tuple(tuple: (String, String)) -> Self {
+        Self {
+            name: tuple.0,
+            reading: tuple.1,
+        }
+    }
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+    pub fn reading(&self) -> &str {
+        &self.reading
+    }
+}
+
+#[derive(Debug, Clone)]
+#[wasm_bindgen]
+pub struct NameSet {
+    city_name: Name,
+    county_name: Name,
+    subprefecture_name: Name,
+    subprefecture_postfix: Name,
+    government: Name,
+}
+
+impl NameSet {
+    pub fn city_name(&self) -> &Name {
+        &self.city_name
+    }
+
+    pub fn county_name(&self) -> &Name {
+        &self.county_name
+    }
+
+    pub fn subprefecture_name(&self) -> &Name {
+        &self.subprefecture_name
+    }
+
+    pub fn subprefecture_postfix(&self) -> &Name {
+        &self.subprefecture_postfix
+    }
+
+    pub fn government(&self) -> &Name {
+        &self.government
+    }
+}
+
+#[wasm_bindgen]
 pub struct StandardMap {
     map: Map,
     bound_min: Site,
@@ -36,9 +84,25 @@ pub struct StandardMap {
     nameset: NameSet,
 }
 
+#[wasm_bindgen]
+#[derive(Debug, Clone)]
 pub struct NetworkNode {
-    pub id: NodeId,
-    pub node: TransportNode,
+    transport_node: TransportNode,
+}
+
+#[wasm_bindgen]
+impl NetworkNode {
+    pub fn x(&self) -> f64 {
+        self.transport_node.site.x
+    }
+
+    pub fn y(&self) -> f64 {
+        self.transport_node.site.y
+    }
+
+    pub fn stage(&self) -> usize {
+        self.transport_node.stage.as_num()
+    }
 }
 
 impl StandardMap {
@@ -65,7 +129,11 @@ impl StandardMap {
         Ok(map)
     }
 
-    pub fn new(seed: u32, source: &str, x_expand_prop: f64) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn new(
+        seed: u32,
+        source: &str,
+        x_expand_prop: f64,
+    ) -> Result<Self, Box<dyn std::error::Error>> {
         let mut rnd = StdRng::seed_from_u64(seed as u64);
         let land_ratio = rnd.gen_range(0.5..1.0);
         let city_size_prop_min = 0.01;
@@ -76,12 +144,14 @@ impl StandardMap {
 
         println!("city_size_prop: {}", city_size_prop);
         let mut namegen = NameGenerator::new(source, seed as usize);
-        let city_name = namegen
-            .generate(NameConfig {
-                target_name_length: 3.1 - city_size_prop * 20.0,
-                cmp_samples: 5,
-            })
-            .ok_or("Failed to generate city name")?;
+        let city_name = Name::from_tuple(
+            namegen
+                .generate(NameConfig {
+                    target_name_length: 3.1 - city_size_prop * 20.0,
+                    cmp_samples: 5,
+                })
+                .ok_or("Failed to generate city name")?,
+        );
 
         let map_config = MapConfig {
             sea_level: 1e-1,
@@ -110,43 +180,47 @@ impl StandardMap {
 
         let gov_population = map.population + rnd.gen_range(0..map.population / 2);
         let government = if gov_population < 3000 {
-            ("村".to_string(), "mura".to_string())
+            Name::from_tuple(("村".to_string(), "mura".to_string()))
         } else if gov_population < 20000 {
-            ("町".to_string(), "cho".to_string())
+            Name::from_tuple(("町".to_string(), "cho".to_string()))
         } else {
-            ("市".to_string(), "shi".to_string())
+            Name::from_tuple(("市".to_string(), "shi".to_string()))
         };
-        let county_name_is_city_name = rnd.gen_bool(0.5) && (government.0 != "村");
+        let county_name_is_city_name = rnd.gen_bool(0.5) && (government.name != "村");
         let county_name = if county_name_is_city_name {
             city_name.clone()
         } else {
-            namegen
-                .generate(NameConfig {
-                    target_name_length: 2.1,
-                    cmp_samples: 5,
-                })
-                .ok_or("Failed to generate county name")?
+            Name::from_tuple(
+                namegen
+                    .generate(NameConfig {
+                        target_name_length: 2.1,
+                        cmp_samples: 5,
+                    })
+                    .ok_or("Failed to generate county name")?,
+            )
         };
-        let subprefecture_name_is_city_name = (rnd.gen_bool(0.2) && government.0 == "市")
-            || (rnd.gen_bool(0.1) && government.0 == "町");
+        let subprefecture_name_is_city_name = (rnd.gen_bool(0.2) && government.name == "市")
+            || (rnd.gen_bool(0.1) && government.name == "町");
         let subprefecture_name_is_county_name = rnd.gen_bool(0.1);
         let subprefecture_name = if subprefecture_name_is_city_name {
             city_name.clone()
         } else if subprefecture_name_is_county_name {
             county_name.clone()
         } else {
-            namegen
-                .generate(NameConfig {
-                    target_name_length: 2.1,
-                    cmp_samples: 5,
-                })
-                .ok_or("Failed to generate subprefecture name")?
+            Name::from_tuple(
+                namegen
+                    .generate(NameConfig {
+                        target_name_length: 2.1,
+                        cmp_samples: 5,
+                    })
+                    .ok_or("Failed to generate subprefecture name")?,
+            )
         };
 
         let subprefecture_postfix = if rnd.gen_bool(0.8) {
-            ("総合振興局".to_string(), "sogoshinkoukyoku".to_string())
+            Name::from_tuple(("総合振興局".to_string(), "sogoshinkoukyoku".to_string()))
         } else {
-            ("振興局".to_string(), "shinkoukyoku".to_string())
+            Name::from_tuple(("振興局".to_string(), "shinkoukyoku".to_string()))
         };
 
         let bound_min = terrain_config.bound_min();
@@ -198,21 +272,26 @@ impl StandardMap {
         self.map.terrain.get_elevation(&Site2D { x, y })
     }
 
-    pub fn network_nodes(&self) -> Vec<NetworkNode> {
+    pub fn network_paths(&self) -> Vec<(TransportNode, TransportNode)> {
         self.map
             .network
             .nodes_iter()
-            .map(|(id, &node)| NetworkNode { id, node })
+            .flat_map(|(inode_id, &inode)| {
+                let iter = self.map.network.neighbors_iter(inode_id);
+                if let Some(iter) = iter {
+                    iter.filter_map(|(jnode_id, &jnode)| {
+                        if inode_id < jnode_id {
+                            Some((inode, jnode))
+                        } else {
+                            None
+                        }
+                    })
+                    .collect::<Vec<(TransportNode, TransportNode)>>()
+                } else {
+                    Vec::new()
+                }
+            })
             .collect()
-    }
-
-    pub fn network_neighbors(&self, node_id: NodeId) -> Vec<NetworkNode> {
-        let iter = self.map.network.neighbors_iter(node_id);
-        if let Some(iter) = iter {
-            iter.map(|(id, &node)| NetworkNode { id, node }).collect()
-        } else {
-            Vec::new()
-        }
     }
 
     pub fn get_origin_site(&self) -> (f64, f64) {

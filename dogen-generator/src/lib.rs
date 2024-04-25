@@ -17,35 +17,44 @@ mod tests {
 
         let x_expand_prop = 1.4;
 
-        let standard = &StandardMap::new(seed, include_str!("../dataset/placenames.csv"), x_expand_prop).unwrap();
-        let img_width = (1000.0*x_expand_prop) as u32;
+        let standard = &StandardMap::new(
+            seed,
+            include_str!("../dataset/placenames.csv"),
+            x_expand_prop,
+        )
+        .unwrap();
+        let img_width = (1000.0 * x_expand_prop) as u32;
         let img_height = 1000;
 
         let address = {
             let subprefecture = format!(
                 "{}{}",
-                standard.get_nameset().subprefecture_name.0,
-                standard.get_nameset().subprefecture_postfix.0
+                standard.get_nameset().subprefecture_name().name(),
+                standard.get_nameset().subprefecture_postfix().name()
             );
-            if standard.get_nameset().government.0 == "市" {
+            if standard.get_nameset().government().name() == "市" {
                 format!(
                     "{} {}{}",
                     subprefecture,
-                    standard.get_nameset().city_name.0,
-                    standard.get_nameset().government.0
+                    standard.get_nameset().city_name().name(),
+                    standard.get_nameset().government().name()
                 )
             } else {
                 format!(
                     "{} {}郡{}{}",
                     subprefecture,
-                    standard.get_nameset().county_name.0,
-                    standard.get_nameset().city_name.0,
-                    standard.get_nameset().government.0
+                    standard.get_nameset().county_name().name(),
+                    standard.get_nameset().city_name().name(),
+                    standard.get_nameset().government().name()
                 )
             }
         };
 
-        println!("{}市街 ({})", standard.get_nameset().city_name.0, address);
+        println!(
+            "{}市街 ({})",
+            standard.get_nameset().city_name().name(),
+            address
+        );
         println!("人口 {}人", standard.get_population());
 
         let blend_color = |color_a: [u8; 3], color_b: [u8; 3], prop: f64| -> [u8; 3] {
@@ -134,36 +143,29 @@ mod tests {
             );
         }
 
-        standard.network_nodes().iter().for_each(|inodeset| {
-            let (inode_id, inode) = (inodeset.id, inodeset.node);
-            standard
-                .network_neighbors(inode_id)
-                .iter()
-                .for_each(|jnodeset| {
-                    let jnode = jnodeset.node;
-                    paint.set_color_rgba8(100, 100, 100, 255);
+        standard.network_paths().iter().for_each(|(inode, jnode)| {
+            paint.set_color_rgba8(100, 100, 100, 255);
 
-                    let width = if jnode.stage.as_num().max(inode.stage.as_num()) == 0 {
-                        1.5
-                    } else {
-                        0.5
-                    };
+            let width = if jnode.stage.as_num().max(inode.stage.as_num()) == 0 {
+                1.5
+            } else {
+                0.5
+            };
 
-                    let stroke = Stroke {
-                        width,
-                        ..Default::default()
-                    };
+            let stroke = Stroke {
+                width,
+                ..Default::default()
+            };
 
-                    let path = {
-                        let mut path = PathBuilder::new();
-                        path.move_to(img_x_of(inode.site.x) as f32, img_y_of(inode.site.y) as f32);
-                        path.line_to(img_x_of(jnode.site.x) as f32, img_y_of(jnode.site.y) as f32);
-                        path.finish().unwrap()
-                    };
+            let path = {
+                let mut path = PathBuilder::new();
+                path.move_to(img_x_of(inode.site.x) as f32, img_y_of(inode.site.y) as f32);
+                path.line_to(img_x_of(jnode.site.x) as f32, img_y_of(jnode.site.y) as f32);
+                path.finish().unwrap()
+            };
 
-                    paint.set_color_rgba8(0, 0, 0, 80);
-                    pixmap.stroke_path(&path, &paint, &stroke, Transform::identity(), None);
-                });
+            paint.set_color_rgba8(0, 0, 0, 80);
+            pixmap.stroke_path(&path, &paint, &stroke, Transform::identity(), None);
         });
 
         paint.set_color_rgba8(255, 0, 0, 255);
