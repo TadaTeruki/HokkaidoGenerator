@@ -16,15 +16,19 @@ use crate::{
     placename::{NameConfig, NameGenerator},
 };
 
+pub struct NameSet {
+    pub city_name: (String, String),
+    pub county_name: (String, String),
+    pub subprefecture_name: (String, String),
+    pub subprefecture_postfix: (String, String),
+    pub government: (String, String),
+}
+
 pub struct StandardMap {
     map: Map,
     bound_min: Site,
     bound_max: Site,
-    city_name: String,
-    county_name: String,
-    subprefecture_name: String,
-    subprefecture_postfix: String,
-    government: String,
+    nameset: NameSet,
 }
 
 impl StandardMap {
@@ -67,8 +71,7 @@ impl StandardMap {
                 target_name_length: 3.1 - city_size_prop * 20.0,
                 cmp_samples: 5,
             })
-            .ok_or("Failed to generate city name")?
-            .0;
+            .ok_or("Failed to generate city name")?;
 
         let map_config = MapConfig {
             sea_level: 1e-1,
@@ -82,7 +85,7 @@ impl StandardMap {
         let terrain_config = TerrainConfig {
             bound: 250.0,
             seed,
-            particle_num: 50000,
+            particle_num: 45000,
             fault_scale: 0.1,
             erodibility_distribution_power: 3.0,
             land_ratio,
@@ -94,13 +97,13 @@ impl StandardMap {
 
         let gov_population = map.population + rnd.gen_range(0..map.population / 2);
         let government = if gov_population < 3000 {
-            "村"
+            ("村".to_string(), "mura".to_string())
         } else if gov_population < 20000 {
-            "町"
+            ("町".to_string(), "cho".to_string())
         } else {
-            "市"
+            ("市".to_string(), "shi".to_string())
         };
-        let county_name_is_city_name = rnd.gen_bool(0.5) && (government != "村");
+        let county_name_is_city_name = rnd.gen_bool(0.5) && (government.0 != "村");
         let county_name = if county_name_is_city_name {
             city_name.clone()
         } else {
@@ -110,10 +113,9 @@ impl StandardMap {
                     cmp_samples: 5,
                 })
                 .ok_or("Failed to generate county name")?
-                .0
         };
-        let subprefecture_name_is_city_name =
-            (rnd.gen_bool(0.2) && government == "市") || (rnd.gen_bool(0.1) && government == "町");
+        let subprefecture_name_is_city_name = (rnd.gen_bool(0.2) && government.0 == "市")
+            || (rnd.gen_bool(0.1) && government.0 == "町");
         let subprefecture_name_is_county_name = rnd.gen_bool(0.1);
         let subprefecture_name = if subprefecture_name_is_city_name {
             city_name.clone()
@@ -126,13 +128,12 @@ impl StandardMap {
                     cmp_samples: 5,
                 })
                 .ok_or("Failed to generate subprefecture name")?
-                .0
         };
 
         let subprefecture_postfix = if rnd.gen_bool(0.8) {
-            "総合振興局"
+            ("総合振興局".to_string(), "sogoshinkoukyoku".to_string())
         } else {
-            "振興局"
+            ("振興局".to_string(), "shinkoukyoku".to_string())
         };
 
         let bound_min = terrain_config.bound_min();
@@ -148,24 +149,14 @@ impl StandardMap {
                 x: bound_max.x,
                 y: bound_max.y,
             },
-            city_name,
-            county_name,
-            subprefecture_name,
-            subprefecture_postfix: String::from(subprefecture_postfix),
-            government: String::from(government),
+            nameset: NameSet {
+                city_name,
+                county_name,
+                subprefecture_name,
+                subprefecture_postfix,
+                government,
+            },
         })
-    }
-
-    pub fn get_address(&self) -> String {
-        let subprefecture = format!("{}{}", self.subprefecture_name, self.subprefecture_postfix);
-        if self.government == "市" {
-            format!("{} {}{}", subprefecture, self.city_name, self.government)
-        } else {
-            format!(
-                "{} {}郡{}{}",
-                subprefecture, self.county_name, self.city_name, self.government
-            )
-        }
     }
 
     fn rules_fn(
@@ -244,7 +235,29 @@ mod tests {
         let standard = StandardMap::new(seed, include_str!("../dataset/placenames.csv")).unwrap();
         let img_width = 1000;
         let img_height = 1000;
-        println!("{}市街 ({})", standard.city_name, standard.get_address());
+
+        let address = {
+            let subprefecture = format!(
+                "{}{}",
+                standard.nameset.subprefecture_name.0, standard.nameset.subprefecture_postfix.0
+            );
+            if standard.nameset.government.0 == "市" {
+                format!(
+                    "{} {}{}",
+                    subprefecture, standard.nameset.city_name.0, standard.nameset.government.0
+                )
+            } else {
+                format!(
+                    "{} {}郡{}{}",
+                    subprefecture,
+                    standard.nameset.county_name.0,
+                    standard.nameset.city_name.0,
+                    standard.nameset.government.0
+                )
+            }
+        };
+
+        println!("{}市街 ({})", standard.nameset.city_name.0, address);
         println!("人口 {}人", standard.map.population);
 
         let blend_color = |color_a: [u8; 3], color_b: [u8; 3], prop: f64| -> [u8; 3] {
