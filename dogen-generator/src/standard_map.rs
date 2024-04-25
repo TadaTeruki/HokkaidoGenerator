@@ -139,7 +139,7 @@ impl StandardMap {
             terrain_config,
             city_name,
             county_name,
-            subprefecture_name: String::from(subprefecture_name),
+            subprefecture_name,
             subprefecture_postfix: String::from(subprefecture_postfix),
             government: String::from(government),
         })
@@ -228,6 +228,7 @@ mod tests {
     #[test]
     fn test_standard_map() {
         let seed: u32 = rand::thread_rng().gen();
+        println!("seed: {}", seed);
 
         let standard = StandardMap::new(seed, include_str!("../dataset/placenames.csv")).unwrap();
         let img_width = 1000;

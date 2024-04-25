@@ -80,7 +80,7 @@ impl TerrainBuilder {
         // Noise generator
         let perlin = Perlin::new(seed);
 
-        let global_scale = 1.0;
+        let global_scale = 5.0;
 
         let bound_min = self.config.bound_min();
         let bound_max = self.config.bound_max();

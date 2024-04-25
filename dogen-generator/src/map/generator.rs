@@ -139,8 +139,7 @@ where
                                     x: inode.site.x,
                                     y: inode.site.y,
                                 };
-                                let density = self
-                                    .interpolator
+                                self.interpolator
                                     .interpolate(
                                         &self.population_densities,
                                         naturalneighbor::Point {
@@ -149,8 +148,7 @@ where
                                         },
                                     )
                                     .unwrap_or(None)
-                                    .unwrap_or(0.0);
-                                density
+                                    .unwrap_or(0.0)
                             }
                         })
                         .sum::<f64>()
@@ -265,8 +263,7 @@ fn calculate_population_density(
                 .min(1.0)
                 .max(0.0)
                 .powf(1.0 / map_config.city_size_prop);
-            let density = density * dprop;
-            density
+            density * dprop
         })
         .collect::<Vec<_>>();
 
