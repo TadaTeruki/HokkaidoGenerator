@@ -1,7 +1,4 @@
-use fastlem::{
-    core::traits::Model,
-    models::surface::{sites::Site2D, terrain::Terrain2D},
-};
+use fastlem::{core::traits::Model, models::surface::terrain::Terrain2D};
 use naturalneighbor::Interpolator;
 use rand::SeedableRng;
 use street_engine::{
@@ -27,6 +24,7 @@ pub struct MapConfig {
     pub sea_level: f64,
     pub max_slope_livable: f64,
     pub origin_sample_num: usize,
+    pub max_retries: usize,
     pub origin_min_evelation: f64,
     pub city_size_prop: f64,
 }
@@ -68,22 +66,30 @@ where
         let half_bound_min = terrain_config.half_bound_min();
         let half_bound_max = terrain_config.half_bound_max();
 
-        let origin_site = (0..map_config.origin_sample_num)
-            .map(|_| {
-                let x = rnd.gen_f64() * (half_bound_max.x - half_bound_min.x) + half_bound_min.x;
-                let y = rnd.gen_f64() * (half_bound_max.y - half_bound_min.y) + half_bound_min.y;
-                Site { x, y }
-            })
-            .filter_map(|site| {
-                let elevation = terrain.get_elevation(&into_fastlem_site(site))?;
-                if elevation < map_config.origin_min_evelation {
-                    return None;
-                }
-                Some((site, elevation))
-            })
-            .min_by(|a, b| a.1.partial_cmp(&b.1).unwrap())
-            .ok_or("Failed to find origin site")?
-            .0;
+        let mut origin_site = None;
+        for _ in 0..map_config.max_retries {
+            origin_site = (0..map_config.origin_sample_num)
+                .map(|_| {
+                    let x =
+                        rnd.gen_f64() * (half_bound_max.x - half_bound_min.x) + half_bound_min.x;
+                    let y =
+                        rnd.gen_f64() * (half_bound_max.y - half_bound_min.y) + half_bound_min.y;
+                    Site { x, y }
+                })
+                .filter_map(|site| {
+                    let elevation = terrain.get_elevation(&into_fastlem_site(site))?;
+                    if elevation < map_config.origin_min_evelation {
+                        return None;
+                    }
+                    Some((site, elevation))
+                })
+                .min_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
+
+            if origin_site.is_some() {
+                break;
+            }
+        }
+        let origin_site = origin_site.ok_or("Failed to find origin site")?.0;
 
         let population_densities = calculate_population_density(
             &terrain,
@@ -129,7 +135,6 @@ where
                             if stage == 0 {
                                 0.0
                             } else {
-                                // population density
                                 let site = Site {
                                     x: inode.site.x,
                                     y: inode.site.y,
@@ -145,7 +150,6 @@ where
                                     )
                                     .unwrap_or(None)
                                     .unwrap_or(0.0);
-
                                 density
                             }
                         })

@@ -61,7 +61,7 @@ impl TerrainBuilder {
             config.bound_min(),
             config.bound_max(),
         )
-        .relaxate_sites(2)?
+        .relaxate_sites(1)?
         .add_edge_sites(None, None)?
         .build()?;
 
@@ -79,6 +79,8 @@ impl TerrainBuilder {
 
         // Noise generator
         let perlin = Perlin::new(seed);
+
+        let global_scale = 1.0;
 
         let bound_min = self.config.bound_min();
         let bound_max = self.config.bound_max();
@@ -107,7 +109,7 @@ impl TerrainBuilder {
         let fault_scale = self.config.fault_scale;
 
         let get_fault = |site: &Site2D| -> (f64, f64) {
-            let scale = 100.0;
+            let scale = 100.0 * global_scale;
             let modulus = octaved_perlin(&perlin, site.x / scale, site.y / scale, 3, 0.5, 2.0)
                 .abs()
                 * 2.0
@@ -148,7 +150,7 @@ impl TerrainBuilder {
                 .iter()
                 .map(|site| {
                     let site = &apply_fault(site);
-                    let persistence_scale = 50.;
+                    let persistence_scale = 50. * global_scale;
                     let noise_persistence = octaved_perlin(
                         &perlin,
                         site.x / persistence_scale,
@@ -160,7 +162,7 @@ impl TerrainBuilder {
                     .abs()
                         * 0.7
                         + 0.3;
-                    let plate_scale = 50.;
+                    let plate_scale = 50. * global_scale;
                     let noise_plate = octaved_perlin(
                         &perlin,
                         site.x / plate_scale,
@@ -170,7 +172,7 @@ impl TerrainBuilder {
                         2.4,
                     ) * 0.5
                         + 0.5;
-                    let continent_scale: f64 = 200.;
+                    let continent_scale: f64 = 200. * global_scale;
                     let noise_continent = octaved_perlin(
                         &perlin,
                         site.x / continent_scale,
@@ -204,7 +206,7 @@ impl TerrainBuilder {
                 .enumerate()
                 .map(|(i, site)| {
                     let site = &apply_fault(site);
-                    let erodibility_scale = 75.0;
+                    let erodibility_scale = 75.0 * global_scale;
                     let noise_erodibility = (1.0
                         - octaved_perlin(
                             &perlin,

@@ -1,3 +1,4 @@
+use rand::{rngs::StdRng, Rng, SeedableRng};
 use street_engine::{
     core::{
         geometry::{angle::Angle, site::Site},
@@ -6,42 +7,30 @@ use street_engine::{
     transport::rules::{BranchRules, PathDirectionRules, TransportRules},
 };
 
-use crate::map::{
-    generator::{MapConfig, MapGenerator},
-    terrain::TerrainConfig,
-    Map,
+use crate::{
+    map::{
+        generator::{MapConfig, MapGenerator},
+        terrain::TerrainConfig,
+        Map,
+    },
+    placename::{NameConfig, NameGenerator},
 };
 
 pub struct StandardMap {
     map: Map,
-    map_config: MapConfig,
     terrain_config: TerrainConfig,
+    city_name: String,
+    county_name: String,
+    subprefecture_name: String,
+    subprefecture_postfix: String,
+    government: String,
 }
 
 impl StandardMap {
-    pub fn new(
-        seed: u32,
-        land_ratio: f64,
-        city_size_prop: f64,
-    ) -> Result<Self, Box<dyn std::error::Error>> {
-        let map_config = MapConfig {
-            sea_level: 1e-1,
-            max_slope_livable: std::f64::consts::PI / 3.0,
-            origin_sample_num: 1000,
-            origin_min_evelation: 2.0,
-            city_size_prop,
-        };
-
-        let terrain_config = TerrainConfig {
-            bound: 100.0,
-            seed,
-            particle_num: 50000,
-            fault_scale: 0.1,
-            erodibility_distribution_power: 3.0,
-            land_ratio,
-            convex_hull_is_always_outlet: false,
-            global_max_slope: None,
-        };
+    pub fn create_map(
+        terrain_config: TerrainConfig,
+        map_config: MapConfig,
+    ) -> Result<Map, Box<dyn std::error::Error>> {
         let map = MapGenerator::new(
             terrain_config.clone(),
             map_config.clone(),
@@ -57,11 +46,115 @@ impl StandardMap {
             },
         )?
         .build()?;
+
+        Ok(map)
+    }
+
+    pub fn new(seed: u32, source: &str) -> Result<Self, Box<dyn std::error::Error>> {
+        let mut rnd = StdRng::seed_from_u64(seed as u64);
+        let land_ratio = rnd.gen_range(0.5..1.0);
+        let city_size_prop_min = 0.01;
+        let city_size_prop_max = 0.12;
+        let city_size_prop = (city_size_prop_min
+            + (city_size_prop_max - city_size_prop_min) * rnd.gen::<f64>().powi(4))
+            * land_ratio;
+
+        println!("city_size_prop: {}", city_size_prop);
+        let mut namegen = NameGenerator::new(source, seed as usize);
+        let city_name = namegen
+            .generate(NameConfig {
+                target_name_length: 3.1 - city_size_prop * 20.0,
+                cmp_samples: 5,
+            })
+            .ok_or("Failed to generate city name")?
+            .0;
+
+        let map_config = MapConfig {
+            sea_level: 1e-1,
+            max_slope_livable: std::f64::consts::PI / 3.0,
+            origin_sample_num: 10,
+            max_retries: 500,
+            origin_min_evelation: 2.0,
+            city_size_prop,
+        };
+
+        let terrain_config = TerrainConfig {
+            bound: 250.0,
+            seed,
+            particle_num: 50000,
+            fault_scale: 0.1,
+            erodibility_distribution_power: 3.0,
+            land_ratio,
+            convex_hull_is_always_outlet: false,
+            global_max_slope: None,
+        };
+
+        let map = Self::create_map(terrain_config.clone(), map_config.clone())?;
+
+        let gov_population = map.population + rnd.gen_range(0..map.population / 2);
+        let government = if gov_population < 3000 {
+            "村"
+        } else if gov_population < 20000 {
+            "町"
+        } else {
+            "市"
+        };
+        let county_name_is_city_name = rnd.gen_bool(0.5) && (government != "村");
+        let county_name = if county_name_is_city_name {
+            city_name.clone()
+        } else {
+            namegen
+                .generate(NameConfig {
+                    target_name_length: 2.1,
+                    cmp_samples: 5,
+                })
+                .ok_or("Failed to generate county name")?
+                .0
+        };
+        let subprefecture_name_is_city_name =
+            (rnd.gen_bool(0.2) && government == "市") || (rnd.gen_bool(0.1) && government == "町");
+        let subprefecture_name_is_county_name = rnd.gen_bool(0.1);
+        let subprefecture_name = if subprefecture_name_is_city_name {
+            city_name.clone()
+        } else if subprefecture_name_is_county_name {
+            county_name.clone()
+        } else {
+            namegen
+                .generate(NameConfig {
+                    target_name_length: 2.1,
+                    cmp_samples: 5,
+                })
+                .ok_or("Failed to generate subprefecture name")?
+                .0
+        };
+
+        let subprefecture_postfix = if rnd.gen_bool(0.8) {
+            "総合振興局"
+        } else {
+            "振興局"
+        };
+
         Ok(Self {
             map,
-            map_config,
             terrain_config,
+            city_name,
+            county_name,
+            subprefecture_name: String::from(subprefecture_name),
+            subprefecture_postfix: String::from(subprefecture_postfix),
+            government: String::from(government),
         })
+    }
+
+    pub fn get_address(&self) -> String {
+        let subprefecture = format!("{}{}", self.subprefecture_name, self.subprefecture_postfix);
+        if self.government == "市" {
+            format!("{} {}{}", subprefecture, self.city_name, self.government)
+        } else {
+            format!(
+                "{} {}郡{}{}",
+                subprefecture, self.county_name, self.city_name, self.government
+            )
+        }
     }
 
     fn rules_fn(
@@ -76,6 +169,12 @@ impl StandardMap {
             return None;
         }
 
+        let population_density = if stage.as_num() > 0 {
+            population_density
+        } else {
+            population_density.max(0.001)
+        };
+
         let path_priority = (1e-9 + population_density) * (-elevation);
 
         if stage.as_num() > 0 {
@@ -87,8 +186,8 @@ impl StandardMap {
                 path_priority,
                 elevation,
                 population_density,
-                path_normal_length: 0.25,
-                path_extra_length_for_intersection: 0.15,
+                path_normal_length: 0.5,
+                path_extra_length_for_intersection: 0.3,
                 branch_rules: BranchRules {
                     branch_density: 0.01 + population_density * 0.99,
                     staging_probability: 0.0,
@@ -99,40 +198,20 @@ impl StandardMap {
                 },
             })
         } else {
-            let (path_direction_rules, branch_rules) = if elevation < 0.5
-                && population_density > 0.01
-            {
-                (
-                    PathDirectionRules {
-                        max_radian: std::f64::consts::PI / 2.0,
-                        comparison_step: 15,
-                    },
-                    BranchRules {
-                        branch_density: 0.1,
-                        staging_probability: 0.0,
-                    },
-                )
-            } else {
-                (
-                    PathDirectionRules {
-                        max_radian: std::f64::consts::PI / (30.0 + 10000.0 * population_density),
-                        comparison_step: 3,
-                    },
-                    BranchRules {
-                        branch_density: 0.1 + population_density * 0.9,
-                        staging_probability: 0.99 - population_density * 0.2,
-                    },
-                )
-            };
-
             Some(TransportRules {
                 path_priority: path_priority + 1e5,
                 elevation,
                 population_density,
-                path_normal_length: 0.25,
-                path_extra_length_for_intersection: 0.15,
-                branch_rules,
-                path_direction_rules,
+                path_normal_length: 0.5,
+                path_extra_length_for_intersection: 0.3,
+                branch_rules: BranchRules {
+                    branch_density: 0.1 + population_density * 0.9,
+                    staging_probability: 0.99 - population_density * 0.2,
+                },
+                path_direction_rules: PathDirectionRules {
+                    max_radian: std::f64::consts::PI / (50.0 + 10000.0 * population_density),
+                    comparison_step: 5,
+                },
             })
         }
     }
@@ -148,6 +227,14 @@ mod tests {
 
     #[test]
     fn test_standard_map() {
+        let seed: u32 = rand::thread_rng().gen();
+
+        let standard = StandardMap::new(seed, include_str!("../dataset/placenames.csv")).unwrap();
+        let img_width = 1000;
+        let img_height = 1000;
+        println!("{}市街 ({})", standard.city_name, standard.get_address());
+        println!("人口 {}人", standard.map.population);
+
         let blend_color = |color_a: [u8; 3], color_b: [u8; 3], prop: f64| -> [u8; 3] {
             [
                 (color_a[0] as f64 + (color_b[0] as f64 - color_a[0] as f64) * prop) as u8,
@@ -189,11 +276,6 @@ mod tests {
             };
             land_color
         };
-
-        let standard = StandardMap::new(1, 0.8, 0.1).unwrap();
-        let img_width = 1000;
-        let img_height = 1000;
-        println!("population: {}", standard.map.population);
 
         let img_x_of = |x: f64| -> f64 {
             (x - standard.terrain_config.bound_min().x)
