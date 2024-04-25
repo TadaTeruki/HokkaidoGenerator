@@ -28,7 +28,6 @@ pub struct MapConfig {
     pub max_slope_livable: f64,
     pub origin_sample_num: usize,
     pub origin_min_evelation: f64,
-    pub initial_angle: f64,
     pub city_size_prop: f64,
 }
 
@@ -109,20 +108,61 @@ where
     pub fn build(self) -> Result<Map, Box<dyn std::error::Error>> {
         let mut rnd = RandomF64::new(rand::rngs::StdRng::seed_from_u64(0));
 
+        let initial_angle = rnd.gen_f64() * std::f64::consts::PI * 2.0;
+
         println!("Creating transport network...");
         let network = TransportBuilder::new(&self)
-            .add_origin(self.origin_site, self.map_config.initial_angle, None)
+            .add_origin(self.origin_site, initial_angle, None)
             .ok_or("Failed to add origin")?
             .iterate_as_possible(&mut rnd)
             .build();
 
         println!("Map generation completed.");
 
+        let population = network
+            .nodes_iter()
+            .map(|(inode_id, inode)| {
+                let p = network.neighbors_iter(inode_id).map(|neighbors_iter| {
+                    neighbors_iter
+                        .map(|(_, jnode)| {
+                            let stage = jnode.stage.as_num().max(inode.stage.as_num());
+                            if stage == 0 {
+                                0.0
+                            } else {
+                                // population density
+                                let site = Site {
+                                    x: inode.site.x,
+                                    y: inode.site.y,
+                                };
+                                let density = self
+                                    .interpolator
+                                    .interpolate(
+                                        &self.population_densities,
+                                        naturalneighbor::Point {
+                                            x: site.x,
+                                            y: site.y,
+                                        },
+                                    )
+                                    .unwrap_or(None)
+                                    .unwrap_or(0.0);
+
+                                density
+                            }
+                        })
+                        .sum::<f64>()
+                });
+                p.unwrap_or(0.0)
+            })
+            .sum::<f64>()
+            * 50.0;
+
         Ok(Map::new(
             self.terrain,
             self.interpolator,
             network,
             self.origin_site,
+            initial_angle,
+            population as usize,
         ))
     }
 }
@@ -217,9 +257,10 @@ fn calculate_population_density(
                 x: site.x,
                 y: site.y,
             });
-            let dprop = (1.0 - distance / (terrain_config.bound * map_config.city_size_prop))
+            let dprop = (1.0 - distance / terrain_config.bound)
                 .min(1.0)
-                .max(0.0);
+                .max(0.0)
+                .powf(1.0 / map_config.city_size_prop);
             let density = density * dprop;
             density
         })

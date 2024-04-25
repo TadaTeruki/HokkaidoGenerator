@@ -13,6 +13,8 @@ pub struct Map {
     pub interpolator: Interpolator,
     pub network: PathNetwork<TransportNode>,
     pub origin: Site,
+    pub initial_angle: f64,
+    pub population: usize,
 }
 
 impl Map {
@@ -21,12 +23,16 @@ impl Map {
         interpolator: Interpolator,
         network: PathNetwork<TransportNode>,
         origin: Site,
+        initial_angle: f64,
+        population: usize,
     ) -> Self {
         Self {
             terrain,
             interpolator,
             network,
             origin,
+            initial_angle,
+            population,
         }
     }
 }

@@ -22,23 +22,21 @@ impl StandardMap {
     pub fn new(
         seed: u32,
         land_ratio: f64,
-        initial_angle: f64,
         city_size_prop: f64,
     ) -> Result<Self, Box<dyn std::error::Error>> {
         let map_config = MapConfig {
             sea_level: 1e-1,
             max_slope_livable: std::f64::consts::PI / 3.0,
-            origin_sample_num: 100,
+            origin_sample_num: 1000,
             origin_min_evelation: 2.0,
-            initial_angle,
             city_size_prop,
         };
 
         let terrain_config = TerrainConfig {
             bound: 100.0,
             seed,
-            particle_num: 70000,
-            fault_scale: 0.01,
+            particle_num: 50000,
+            fault_scale: 0.1,
             erodibility_distribution_power: 3.0,
             land_ratio,
             convex_hull_is_always_outlet: false,
@@ -59,7 +57,6 @@ impl StandardMap {
             },
         )?
         .build()?;
-
         Ok(Self {
             map,
             map_config,
@@ -90,32 +87,52 @@ impl StandardMap {
                 path_priority,
                 elevation,
                 population_density,
-                path_normal_length: 0.125,
-                path_extra_length_for_intersection: 0.1,
+                path_normal_length: 0.25,
+                path_extra_length_for_intersection: 0.15,
                 branch_rules: BranchRules {
-                    branch_density: 0.001 + population_density * 0.999,
+                    branch_density: 0.01 + population_density * 0.99,
                     staging_probability: 0.0,
                 },
                 path_direction_rules: PathDirectionRules {
-                    max_radian: std::f64::consts::PI / (60.0 + 1000.0 * population_density),
-                    comparison_step: 5,
+                    max_radian: std::f64::consts::PI / (1500.0 + 1000.0 * population_density),
+                    comparison_step: 3,
                 },
             })
         } else {
+            let (path_direction_rules, branch_rules) = if elevation < 0.5
+                && population_density > 0.01
+            {
+                (
+                    PathDirectionRules {
+                        max_radian: std::f64::consts::PI / 2.0,
+                        comparison_step: 15,
+                    },
+                    BranchRules {
+                        branch_density: 0.1,
+                        staging_probability: 0.0,
+                    },
+                )
+            } else {
+                (
+                    PathDirectionRules {
+                        max_radian: std::f64::consts::PI / (30.0 + 10000.0 * population_density),
+                        comparison_step: 3,
+                    },
+                    BranchRules {
+                        branch_density: 0.1 + population_density * 0.9,
+                        staging_probability: 0.99 - population_density * 0.2,
+                    },
+                )
+            };
+
             Some(TransportRules {
                 path_priority: path_priority + 1e5,
                 elevation,
                 population_density,
-                path_normal_length: 0.125,
-                path_extra_length_for_intersection: 0.1,
-                branch_rules: BranchRules {
-                    branch_density: 0.1 + population_density * 0.9,
-                    staging_probability: 1.0 - population_density * 0.2,
-                },
-                path_direction_rules: PathDirectionRules {
-                    max_radian: std::f64::consts::PI / (30.0 + 10000.0 * population_density),
-                    comparison_step: 3,
-                },
+                path_normal_length: 0.25,
+                path_extra_length_for_intersection: 0.15,
+                branch_rules,
+                path_direction_rules,
             })
         }
     }
@@ -173,9 +190,10 @@ mod tests {
             land_color
         };
 
-        let standard = StandardMap::new(150, 0.7, std::f64::consts::PI / 6.0, 0.1).unwrap();
+        let standard = StandardMap::new(1, 0.8, 0.1).unwrap();
         let img_width = 1000;
         let img_height = 1000;
+        println!("population: {}", standard.map.population);
 
         let img_x_of = |x: f64| -> f64 {
             (x - standard.terrain_config.bound_min().x)
