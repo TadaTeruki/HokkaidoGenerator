@@ -34,17 +34,17 @@ impl TerrainConfig {
         }
     }
 
-    pub fn half_bound_min(&self) -> Site2D {
+    pub fn central_bound_min(&self) -> Site2D {
         Site2D {
-            x: -self.bound / 4.0,
-            y: -self.bound / 4.0,
+            x: -self.bound / 8.0,
+            y: -self.bound / 8.0,
         }
     }
 
-    pub fn half_bound_max(&self) -> Site2D {
+    pub fn central_bound_max(&self) -> Site2D {
         Site2D {
-            x: self.bound / 4.0,
-            y: self.bound / 4.0,
+            x: self.bound / 8.0,
+            y: self.bound / 8.0,
         }
     }
 }

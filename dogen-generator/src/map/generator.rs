@@ -63,17 +63,17 @@ where
 
         let mut rnd = RandomF64::new(rand::rngs::StdRng::seed_from_u64(0));
 
-        let half_bound_min = terrain_config.half_bound_min();
-        let half_bound_max = terrain_config.half_bound_max();
+        let central_bound_min = terrain_config.central_bound_min();
+        let central_bound_max = terrain_config.central_bound_max();
 
         let mut origin_site = None;
         for _ in 0..map_config.max_retries {
             origin_site = (0..map_config.origin_sample_num)
                 .map(|_| {
                     let x =
-                        rnd.gen_f64() * (half_bound_max.x - half_bound_min.x) + half_bound_min.x;
+                        rnd.gen_f64() * (central_bound_max.x - central_bound_min.x) + central_bound_min.x;
                     let y =
-                        rnd.gen_f64() * (half_bound_max.y - half_bound_min.y) + half_bound_min.y;
+                        rnd.gen_f64() * (central_bound_max.y - central_bound_min.y) + central_bound_min.y;
                     Site { x, y }
                 })
                 .filter_map(|site| {
