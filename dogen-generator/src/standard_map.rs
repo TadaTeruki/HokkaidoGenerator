@@ -155,7 +155,7 @@ impl StandardMap {
 
         let map_config = MapConfig {
             sea_level: 1e-1,
-            max_slope_livable: std::f64::consts::PI / 3.0,
+            max_slope_livable: std::f64::consts::PI / 4.0,
             origin_sample_num: 10,
             max_retries: 500,
             origin_min_evelation: 2.0,
@@ -317,12 +317,9 @@ impl StandardMap {
         };
 
         let path_priority = (1e-9 + population_density) * (-elevation);
+        let seaside_prop = 1.0 - (elevation / 15.0).min(1.0).max(0.0);
 
         if stage.as_num() > 0 {
-            if elevation > 25.0 {
-                return None;
-            }
-
             Some(TransportRules {
                 path_priority,
                 elevation,
@@ -334,8 +331,9 @@ impl StandardMap {
                     staging_probability: 0.0,
                 },
                 path_direction_rules: PathDirectionRules {
-                    max_radian: std::f64::consts::PI / (1500.0 + 1000.0 * population_density),
-                    comparison_step: 3,
+                    max_radian: std::f64::consts::PI
+                        / (1.0 + 1450.0 * seaside_prop + 1000.0 * population_density),
+                    comparison_step: 7,
                 },
             })
         } else {
@@ -350,7 +348,8 @@ impl StandardMap {
                     staging_probability: 0.99 - population_density * 0.2,
                 },
                 path_direction_rules: PathDirectionRules {
-                    max_radian: std::f64::consts::PI / (50.0 + 10000.0 * population_density),
+                    max_radian: std::f64::consts::PI
+                        / (50.0 + 100.0 * seaside_prop + 10000.0 * population_density),
                     comparison_step: 5,
                 },
             })
