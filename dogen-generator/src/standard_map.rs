@@ -65,7 +65,7 @@ impl StandardMap {
         Ok(map)
     }
 
-    pub fn new(seed: u32, source: &str) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn new(seed: u32, source: &str, x_expand_prop: f64) -> Result<Self, Box<dyn std::error::Error>> {
         let mut rnd = StdRng::seed_from_u64(seed as u64);
         let land_ratio = rnd.gen_range(0.5..1.0);
         let city_size_prop_min = 0.01;
@@ -92,8 +92,11 @@ impl StandardMap {
             city_size_prop,
         };
 
+        let bound = 250.0;
+
         let terrain_config = TerrainConfig {
-            bound: 250.0,
+            x_bound: bound * x_expand_prop,
+            y_bound: bound,
             seed,
             particle_num: 45000,
             fault_scale: 0.1,
@@ -237,7 +240,7 @@ impl StandardMap {
         let path_priority = (1e-9 + population_density) * (-elevation);
 
         if stage.as_num() > 0 {
-            if population_density == 0.0 {
+            if elevation > 25.0 {
                 return None;
             }
 

@@ -9,7 +9,8 @@ use terrain_graph::edge_attributed_undirected::EdgeAttributedUndirectedGraph;
 
 #[derive(Debug, Clone)]
 pub struct TerrainConfig {
-    pub bound: f64,
+    pub x_bound: f64,
+    pub y_bound: f64,
     pub seed: u32,
     pub particle_num: usize,
     pub fault_scale: f64,
@@ -20,31 +21,35 @@ pub struct TerrainConfig {
 }
 
 impl TerrainConfig {
+    pub fn bound_value(&self) -> f64 {
+        self.x_bound.min(self.y_bound)
+    }
+
     pub fn bound_min(&self) -> Site2D {
         Site2D {
-            x: -self.bound / 2.0,
-            y: -self.bound / 2.0,
+            x: -self.x_bound / 2.0,
+            y: -self.y_bound / 2.0,
         }
     }
 
     pub fn bound_max(&self) -> Site2D {
         Site2D {
-            x: self.bound / 2.0,
-            y: self.bound / 2.0,
+            x: self.x_bound / 2.0,
+            y: self.y_bound / 2.0,
         }
     }
 
     pub fn central_bound_min(&self) -> Site2D {
         Site2D {
-            x: -self.bound / 8.0,
-            y: -self.bound / 8.0,
+            x: -self.x_bound / 8.0,
+            y: -self.y_bound / 8.0,
         }
     }
 
     pub fn central_bound_max(&self) -> Site2D {
         Site2D {
-            x: self.bound / 8.0,
-            y: self.bound / 8.0,
+            x: self.x_bound / 8.0,
+            y: self.y_bound / 8.0,
         }
     }
 }

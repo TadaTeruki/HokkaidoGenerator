@@ -15,8 +15,10 @@ mod tests {
         let seed: u32 = rand::thread_rng().gen();
         println!("seed: {}", seed);
 
-        let standard = &StandardMap::new(seed, include_str!("../dataset/placenames.csv")).unwrap();
-        let img_width = 1000;
+        let x_expand_prop = 1.4;
+
+        let standard = &StandardMap::new(seed, include_str!("../dataset/placenames.csv"), x_expand_prop).unwrap();
+        let img_width = (1000.0*x_expand_prop) as u32;
         let img_height = 1000;
 
         let address = {

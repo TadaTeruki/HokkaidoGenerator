@@ -259,7 +259,7 @@ fn calculate_population_density(
                 x: site.x,
                 y: site.y,
             });
-            let dprop = (1.0 - distance / terrain_config.bound)
+            let dprop = (1.0 - distance / terrain_config.bound_value())
                 .min(1.0)
                 .max(0.0)
                 .powf(1.0 / map_config.city_size_prop);
