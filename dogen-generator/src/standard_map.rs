@@ -18,7 +18,8 @@ use crate::{
 
 pub struct StandardMap {
     map: Map,
-    terrain_config: TerrainConfig,
+    bound_min: Site,
+    bound_max: Site,
     city_name: String,
     county_name: String,
     subprefecture_name: String,
@@ -134,9 +135,19 @@ impl StandardMap {
             "振興局"
         };
 
+        let bound_min = terrain_config.bound_min();
+        let bound_max = terrain_config.bound_max();
+
         Ok(Self {
             map,
-            terrain_config,
+            bound_min: Site {
+                x: bound_min.x,
+                y: bound_min.y,
+            },
+            bound_max: Site {
+                x: bound_max.x,
+                y: bound_max.y,
+            },
             city_name,
             county_name,
             subprefecture_name,
@@ -279,21 +290,16 @@ mod tests {
         };
 
         let img_x_of = |x: f64| -> f64 {
-            (x - standard.terrain_config.bound_min().x)
-                / (standard.terrain_config.bound_max().x - standard.terrain_config.bound_min().x)
+            (x - standard.bound_min.x) / (standard.bound_max.x - standard.bound_min.x)
                 * img_width as f64
         };
 
         let img_y_of = |y: f64| -> f64 {
-            (y - standard.terrain_config.bound_min().y)
-                / (standard.terrain_config.bound_max().y - standard.terrain_config.bound_min().y)
+            (y - standard.bound_min.y) / (standard.bound_max.y - standard.bound_min.y)
                 * img_height as f64
         };
 
-        let (bound_min, bound_max) = (
-            standard.terrain_config.bound_min(),
-            standard.terrain_config.bound_max(),
-        );
+        let (bound_min, bound_max) = (standard.bound_min, standard.bound_max);
 
         let terrain = &standard.map.terrain;
 
