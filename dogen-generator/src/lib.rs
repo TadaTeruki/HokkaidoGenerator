@@ -4,7 +4,6 @@ pub mod standard_map;
 
 #[cfg(test)]
 mod tests {
-    use fastlem::models::surface::sites::Site2D;
     use rand::Rng;
     use rayon::prelude::*;
     use tiny_skia::{Paint, PathBuilder, Pixmap, Rect, Stroke, Transform};
@@ -139,7 +138,7 @@ mod tests {
                 .network_neighbors(inode_id)
                 .iter()
                 .for_each(|jnodeset| {
-                    let (jnode_id, jnode) = (jnodeset.id, jnodeset.node);
+                    let jnode = jnodeset.node;
                     paint.set_color_rgba8(100, 100, 100, 255);
 
                     let width = if jnode.stage.as_num().max(inode.stage.as_num()) == 0 {

@@ -70,10 +70,10 @@ where
         for _ in 0..map_config.max_retries {
             origin_site = (0..map_config.origin_sample_num)
                 .map(|_| {
-                    let x =
-                        rnd.gen_f64() * (central_bound_max.x - central_bound_min.x) + central_bound_min.x;
-                    let y =
-                        rnd.gen_f64() * (central_bound_max.y - central_bound_min.y) + central_bound_min.y;
+                    let x = rnd.gen_f64() * (central_bound_max.x - central_bound_min.x)
+                        + central_bound_min.x;
+                    let y = rnd.gen_f64() * (central_bound_max.y - central_bound_min.y)
+                        + central_bound_min.y;
                     Site { x, y }
                 })
                 .filter_map(|site| {
