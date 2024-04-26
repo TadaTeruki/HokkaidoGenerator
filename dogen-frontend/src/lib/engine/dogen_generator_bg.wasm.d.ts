@@ -20,7 +20,6 @@ export function __wbg_get_mapsite_y(a: number): number;
 export function __wbg_set_mapsite_y(a: number, b: number): void;
 export function __wbg_networknode_free(a: number): void;
 export function networknode_site(a: number): number;
-export function networknode_stage(a: number): number;
 export function __wbg_networkpath_free(a: number): void;
 export function create_standard_map(a: number, b: number): number;
 export function __wbg_standardmap_free(a: number): void;

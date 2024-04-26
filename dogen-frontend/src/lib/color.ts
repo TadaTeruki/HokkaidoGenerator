@@ -22,14 +22,23 @@ export class Colormap {
 		const weight1 = this.weights[i - 1];
 		const weight2 = this.weights[i];
 		const ratio = (value - weight1) / (weight2 - weight1);
+
+        const r = Math.floor(color1[0] * (1 - ratio) + color2[0] * ratio);
+        const g = Math.floor(color1[1] * (1 - ratio) + color2[1] * ratio);
+        const b = Math.floor(color1[2] * (1 - ratio) + color2[2] * ratio);
+
 		return [
-			Math.floor(color1[0] * (1 - ratio) + color2[0] * ratio),
-			Math.floor(color1[1] * (1 - ratio) + color2[1] * ratio),
-			Math.floor(color1[2] * (1 - ratio) + color2[2] * ratio)
+            r,
+            g,
+            b
 		] as [number, number, number];
 	}
 }
 
-export function colorToHex(color: [number, number, number]) {
-	return '#' + color.map((c) => c.toString(16).padStart(2, '0')).join('');
+export function blendColors(color1: [number, number, number], color2: [number, number, number], ratio: number) {
+    return [
+        Math.floor(color1[0] * (1 - ratio) + color2[0] * ratio),
+        Math.floor(color1[1] * (1 - ratio) + color2[1] * ratio),
+        Math.floor(color1[2] * (1 - ratio) + color2[2] * ratio)
+    ] as [number, number, number];
 }

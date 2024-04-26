@@ -1,6 +1,6 @@
 // place files you want to import through the `$lib` alias in this folder.
 
-import { Colormap, colorToHex } from './color';
+import { Colormap } from './color';
 import { create_standard_map, ElevationBuffer, type StandardMap } from './engine/dogen_generator';
 
 function xorshift(x: number) {
@@ -26,24 +26,15 @@ export class MapData {
 			}
 		})();
 	}
-	/*
-	propToMapBoundX(x_prop: number) {
-		return this.map.bound_min().x + (this.map.bound_max().x - this.map.bound_min().x) * x_prop;
-	}
-
-	propToMapBoundY(y_prop: number) {
-		return this.map.bound_min().y + (this.map.bound_max().y - this.map.bound_min().y) * y_prop;
-	}
-    */
 
 	drawTerrain(canvas: HTMLCanvasElement) {
 		const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
 
 		const colormap = new Colormap(
 			[
-				[70, 150, 200],
+				[170, 200, 220],
 				[240, 240, 210],
-				[190, 200, 120],
+				[215, 230, 170],
 				[25, 100, 25],
 				[15, 60, 15]
 			],
