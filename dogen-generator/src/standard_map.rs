@@ -168,9 +168,9 @@ impl StandardMap {
             x_bound: bound * x_expand_prop,
             y_bound: bound,
             seed,
-            particle_num: 45000,
+            particle_num: 50000,
             fault_scale: 0.1,
-            erodibility_distribution_power: 3.0,
+            erodibility_distribution_power: 4.0,
             land_ratio,
             convex_hull_is_always_outlet: false,
             global_max_slope: None,
@@ -317,7 +317,7 @@ impl StandardMap {
         };
 
         let path_priority = (1e-9 + population_density) * (-elevation);
-        let seaside_prop = 1.0 - (elevation / 15.0).min(1.0).max(0.0);
+        let seaside_prop = 1.0 - (elevation / 12.0).min(1.0).max(0.0);
 
         if stage.as_num() > 0 {
             Some(TransportRules {
@@ -332,7 +332,7 @@ impl StandardMap {
                 },
                 path_direction_rules: PathDirectionRules {
                     max_radian: std::f64::consts::PI
-                        / (1.0 + 1450.0 * seaside_prop + 1000.0 * population_density),
+                        / (1.0 + 1450.0 * seaside_prop.powf(1.75) + 1000.0 * population_density),
                     comparison_step: 7,
                 },
             })
@@ -344,7 +344,7 @@ impl StandardMap {
                 path_normal_length: 0.5,
                 path_extra_length_for_intersection: 0.3,
                 branch_rules: BranchRules {
-                    branch_density: 0.1 + population_density * 0.9,
+                    branch_density: 0.05 + population_density * 0.95,
                     staging_probability: 0.99 - population_density * 0.2,
                 },
                 path_direction_rules: PathDirectionRules {
