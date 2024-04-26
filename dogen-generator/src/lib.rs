@@ -132,11 +132,7 @@ mod tests {
             let (inode, jnode) = (path.node1(), path.node2());
             paint.set_color_rgba8(100, 100, 100, 255);
 
-            let width = if jnode.stage().max(inode.stage()) == 0 {
-                1.5
-            } else {
-                0.5
-            };
+            let width = if path.stage() == 0 { 1.5 } else { 0.5 };
 
             let stroke = Stroke {
                 width,

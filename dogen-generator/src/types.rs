@@ -98,7 +98,8 @@ impl NetworkNode {
             y: self.transport_node.site.y,
         }
     }
-    pub fn stage(&self) -> usize {
+
+    fn stage(&self) -> usize {
         self.transport_node.stage.as_num()
     }
 }
@@ -121,5 +122,9 @@ impl NetworkPath {
 
     pub fn node2(&self) -> NetworkNode {
         self.node2.clone()
+    }
+
+    pub fn stage(&self) -> usize {
+        self.node1.stage().max(self.node2.stage())
     }
 }
