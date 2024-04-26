@@ -17,12 +17,7 @@ mod tests {
 
         let x_expand_prop = 1.4;
 
-        let standard = &StandardMap::new(
-            seed,
-            include_str!("../dataset/placenames.csv"),
-            x_expand_prop,
-        )
-        .unwrap();
+        let standard = &StandardMap::new(seed, x_expand_prop).unwrap();
         let img_width = (1000.0 * x_expand_prop) as u32;
         let img_height = 1000;
 
@@ -143,10 +138,11 @@ mod tests {
             );
         }
 
-        standard.network_paths().iter().for_each(|(inode, jnode)| {
+        standard.network_paths().iter().for_each(|path| {
+            let (inode, jnode) = (path.node1(), path.node2());
             paint.set_color_rgba8(100, 100, 100, 255);
 
-            let width = if jnode.stage.as_num().max(inode.stage.as_num()) == 0 {
+            let width = if jnode.stage().max(inode.stage()) == 0 {
                 1.5
             } else {
                 0.5
@@ -159,8 +155,14 @@ mod tests {
 
             let path = {
                 let mut path = PathBuilder::new();
-                path.move_to(img_x_of(inode.site.x) as f32, img_y_of(inode.site.y) as f32);
-                path.line_to(img_x_of(jnode.site.x) as f32, img_y_of(jnode.site.y) as f32);
+                path.move_to(
+                    img_x_of(inode.site().x) as f32,
+                    img_y_of(inode.site().y) as f32,
+                );
+                path.line_to(
+                    img_x_of(jnode.site().x) as f32,
+                    img_y_of(jnode.site().y) as f32,
+                );
                 path.finish().unwrap()
             };
 
@@ -173,8 +175,8 @@ mod tests {
         let origin = &standard.get_origin_site();
         pixmap.fill_rect(
             Rect::from_xywh(
-                img_x_of(origin.0) as f32 - 2.0,
-                img_y_of(origin.1) as f32 - 2.0,
+                img_x_of(origin.x) as f32 - 2.0,
+                img_y_of(origin.y) as f32 - 2.0,
                 4.0,
                 4.0,
             )

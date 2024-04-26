@@ -1,14 +1,14 @@
 {
-	"name": "dogen-generator",
-	"version": "0.1.0",
-	"files": [
-		"dogen_generator_bg.wasm",
-		"dogen_generator.js",
-		"dogen_generator.d.ts"
-	],
-	"module": "dogen_generator.js",
-	"types": "dogen_generator.d.ts",
-	"sideEffects": [
-		"./snippets/*"
-	]
+  "name": "dogen-generator",
+  "version": "0.1.0",
+  "files": [
+    "dogen_generator_bg.wasm",
+    "dogen_generator.js",
+    "dogen_generator.d.ts"
+  ],
+  "module": "dogen_generator.js",
+  "types": "dogen_generator.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
 }

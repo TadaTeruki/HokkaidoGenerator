@@ -29,6 +29,7 @@ pub struct Name {
     reading: String,
 }
 
+#[wasm_bindgen]
 impl Name {
     fn from_tuple(tuple: (String, String)) -> Self {
         Self {
@@ -36,11 +37,11 @@ impl Name {
             reading: tuple.1,
         }
     }
-    pub fn name(&self) -> &str {
-        &self.name
+    pub fn name(&self) -> String {
+        self.name.clone()
     }
-    pub fn reading(&self) -> &str {
-        &self.reading
+    pub fn reading(&self) -> String {
+        self.reading.clone()
     }
 }
 
@@ -54,25 +55,26 @@ pub struct NameSet {
     government: Name,
 }
 
+#[wasm_bindgen]
 impl NameSet {
-    pub fn city_name(&self) -> &Name {
-        &self.city_name
+    pub fn city_name(&self) -> Name {
+        self.city_name.clone()
     }
 
-    pub fn county_name(&self) -> &Name {
-        &self.county_name
+    pub fn county_name(&self) -> Name {
+        self.county_name.clone()
     }
 
-    pub fn subprefecture_name(&self) -> &Name {
-        &self.subprefecture_name
+    pub fn subprefecture_name(&self) -> Name {
+        self.subprefecture_name.clone()
     }
 
-    pub fn subprefecture_postfix(&self) -> &Name {
-        &self.subprefecture_postfix
+    pub fn subprefecture_postfix(&self) -> Name {
+        self.subprefecture_postfix.clone()
     }
 
-    pub fn government(&self) -> &Name {
-        &self.government
+    pub fn government(&self) -> Name {
+        self.government.clone()
     }
 }
 
@@ -85,6 +87,12 @@ pub struct StandardMap {
 }
 
 #[wasm_bindgen]
+pub struct MapSite {
+    pub x: f64,
+    pub y: f64,
+}
+
+#[wasm_bindgen]
 #[derive(Debug, Clone)]
 pub struct NetworkNode {
     transport_node: TransportNode,
@@ -92,21 +100,37 @@ pub struct NetworkNode {
 
 #[wasm_bindgen]
 impl NetworkNode {
-    pub fn x(&self) -> f64 {
-        self.transport_node.site.x
+    pub fn site(&self) -> MapSite {
+        MapSite {
+            x: self.transport_node.site.x,
+            y: self.transport_node.site.y,
+        }
     }
-
-    pub fn y(&self) -> f64 {
-        self.transport_node.site.y
-    }
-
     pub fn stage(&self) -> usize {
         self.transport_node.stage.as_num()
     }
 }
 
+#[wasm_bindgen]
+#[derive(Debug, Clone)]
+pub struct NetworkPath {
+    node1: NetworkNode,
+    node2: NetworkNode,
+}
+
+impl NetworkPath {
+    pub fn node1(&self) -> NetworkNode {
+        self.node1.clone()
+    }
+
+    pub fn node2(&self) -> NetworkNode {
+        self.node2.clone()
+    }
+}
+
+#[wasm_bindgen]
 impl StandardMap {
-    pub fn create_map(
+    fn create_map(
         terrain_config: TerrainConfig,
         map_config: MapConfig,
     ) -> Result<Map, Box<dyn std::error::Error>> {
@@ -129,11 +153,7 @@ impl StandardMap {
         Ok(map)
     }
 
-    pub fn new(
-        seed: u32,
-        source: &str,
-        x_expand_prop: f64,
-    ) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn new(seed: u32, x_expand_prop: f64) -> Option<StandardMap> {
         let mut rnd = StdRng::seed_from_u64(seed as u64);
         let land_ratio = rnd.gen_range(0.5..1.0);
         let city_size_prop_min = 0.01;
@@ -143,15 +163,12 @@ impl StandardMap {
             * land_ratio;
 
         println!("city_size_prop: {}", city_size_prop);
-        let mut namegen = NameGenerator::new(source, seed as usize);
-        let city_name = Name::from_tuple(
-            namegen
-                .generate(NameConfig {
-                    target_name_length: 3.1 - city_size_prop * 20.0,
-                    cmp_samples: 5,
-                })
-                .ok_or("Failed to generate city name")?,
-        );
+        let mut namegen =
+            NameGenerator::new(include_str!("../dataset/placenames.csv"), seed as usize);
+        let city_name = Name::from_tuple(namegen.generate(NameConfig {
+            target_name_length: 3.1 - city_size_prop * 20.0,
+            cmp_samples: 5,
+        })?);
 
         let map_config = MapConfig {
             sea_level: 1e-1,
@@ -176,7 +193,7 @@ impl StandardMap {
             global_max_slope: None,
         };
 
-        let map = Self::create_map(terrain_config.clone(), map_config.clone())?;
+        let map = Self::create_map(terrain_config.clone(), map_config.clone()).ok()?;
 
         let gov_population = map.population + rnd.gen_range(0..map.population / 2);
         let government = if gov_population < 3000 {
@@ -190,14 +207,10 @@ impl StandardMap {
         let county_name = if county_name_is_city_name {
             city_name.clone()
         } else {
-            Name::from_tuple(
-                namegen
-                    .generate(NameConfig {
-                        target_name_length: 2.1,
-                        cmp_samples: 5,
-                    })
-                    .ok_or("Failed to generate county name")?,
-            )
+            Name::from_tuple(namegen.generate(NameConfig {
+                target_name_length: 2.1,
+                cmp_samples: 5,
+            })?)
         };
         let subprefecture_name_is_city_name = (rnd.gen_bool(0.2) && government.name == "市")
             || (rnd.gen_bool(0.1) && government.name == "町");
@@ -207,14 +220,10 @@ impl StandardMap {
         } else if subprefecture_name_is_county_name {
             county_name.clone()
         } else {
-            Name::from_tuple(
-                namegen
-                    .generate(NameConfig {
-                        target_name_length: 2.1,
-                        cmp_samples: 5,
-                    })
-                    .ok_or("Failed to generate subprefecture name")?,
-            )
+            Name::from_tuple(namegen.generate(NameConfig {
+                target_name_length: 2.1,
+                cmp_samples: 5,
+            })?)
         };
 
         let subprefecture_postfix = if rnd.gen_bool(0.8) {
@@ -226,7 +235,7 @@ impl StandardMap {
         let bound_min = terrain_config.bound_min();
         let bound_max = terrain_config.bound_max();
 
-        Ok(Self {
+        Some(Self {
             map,
             bound_min: Site {
                 x: bound_min.x,
@@ -246,23 +255,23 @@ impl StandardMap {
         })
     }
 
-    pub fn get_nameset(&self) -> &NameSet {
-        &self.nameset
+    pub fn get_nameset(&self) -> NameSet {
+        self.nameset.clone()
     }
 
     pub fn get_population(&self) -> usize {
         self.map.population
     }
 
-    pub fn bound_min(&self) -> Site {
-        Site {
+    pub fn bound_min(&self) -> MapSite {
+        MapSite {
             x: self.bound_min.x,
             y: self.bound_min.y,
         }
     }
 
-    pub fn bound_max(&self) -> Site {
-        Site {
+    pub fn bound_max(&self) -> MapSite {
+        MapSite {
             x: self.bound_max.x,
             y: self.bound_max.y,
         }
@@ -272,7 +281,7 @@ impl StandardMap {
         self.map.terrain.get_elevation(&Site2D { x, y })
     }
 
-    pub fn network_paths(&self) -> Vec<(TransportNode, TransportNode)> {
+    pub fn network_paths(&self) -> Vec<NetworkPath> {
         self.map
             .network
             .nodes_iter()
@@ -281,12 +290,19 @@ impl StandardMap {
                 if let Some(iter) = iter {
                     iter.filter_map(|(jnode_id, &jnode)| {
                         if inode_id < jnode_id {
-                            Some((inode, jnode))
+                            Some(NetworkPath {
+                                node1: NetworkNode {
+                                    transport_node: inode,
+                                },
+                                node2: NetworkNode {
+                                    transport_node: jnode,
+                                },
+                            })
                         } else {
                             None
                         }
                     })
-                    .collect::<Vec<(TransportNode, TransportNode)>>()
+                    .collect::<Vec<NetworkPath>>()
                 } else {
                     Vec::new()
                 }
@@ -294,8 +310,11 @@ impl StandardMap {
             .collect()
     }
 
-    pub fn get_origin_site(&self) -> (f64, f64) {
-        (self.map.origin.x, self.map.origin.y)
+    pub fn get_origin_site(&self) -> MapSite {
+        MapSite {
+            x: self.map.origin.x,
+            y: self.map.origin.y,
+        }
     }
 
     fn rules_fn(

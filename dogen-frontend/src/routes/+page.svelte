@@ -1,18 +1,23 @@
-<script>
-	import { MapLibre } from 'svelte-maplibre';
+<script lang="ts">
+	//import { MapLibre } from 'svelte-maplibre';
+    import { StandardMap } from '$lib/engine/dogen_generator.js';
+
+    class MapData {
+        map: StandardMap;
+
+        constructor() {
+            this.map = new StandardMap();
+        }
+    }
+
+    function drawMap() {
+        const canvas = document.getElementById('canvasID') as HTMLCanvasElement;
+        const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+    }
+
 </script>
 
-<MapLibre
-	center={[50, 20]}
-	zoom={7}
-	class="map"
-	standardControls
-	style="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
-/>
+<canvas id="map"></canvas>
 
 <style>
-	:global(.map) {
-		height: 70vh;
-		margin: 3vh;
-	}
 </style>
