@@ -1,2 +1,18 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<script>
+	import { MapLibre } from 'svelte-maplibre';
+</script>
+
+<MapLibre
+	center={[50, 20]}
+	zoom={7}
+	class="map"
+	standardControls
+	style="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+/>
+
+<style>
+	:global(.map) {
+		height: 70vh;
+		margin: 3vh;
+	}
+</style>
