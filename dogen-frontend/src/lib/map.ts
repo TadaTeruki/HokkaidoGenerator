@@ -38,7 +38,7 @@ export class MapData {
 				[25, 100, 25],
 				[15, 60, 15]
 			],
-			[0.0, 0.1, 0.15, 30.0, 50.0]
+			[0.0, 0.1, 0.15, 40.0, 80.0]
 		);
 
 		const elevationBuffer = new ElevationBuffer(this.map, canvas.width, canvas.height);
