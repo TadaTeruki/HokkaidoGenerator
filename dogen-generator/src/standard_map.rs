@@ -5,10 +5,7 @@ use street_engine::{
         geometry::{angle::Angle, site::Site},
         Stage,
     },
-    transport::{
-        node::TransportNode,
-        rules::{BranchRules, PathDirectionRules, TransportRules},
-    },
+    transport::rules::{BranchRules, PathDirectionRules, TransportRules},
 };
 use wasm_bindgen::prelude::*;
 
@@ -19,110 +16,12 @@ use crate::{
         Map,
     },
     placename::{NameConfig, NameGenerator},
+    types::{MapSite, Name, NameSet, NetworkNode, NetworkPath},
 };
 
 #[wasm_bindgen]
 pub fn create_standard_map(seed: u32, x_expand_prop: f64) -> Option<StandardMap> {
     StandardMap::new(seed, x_expand_prop)
-}
-
-#[wasm_bindgen]
-#[derive(Debug, Clone)]
-
-pub struct Name {
-    name: String,
-    reading: String,
-}
-
-#[wasm_bindgen]
-impl Name {
-    fn from_tuple(tuple: (String, String)) -> Self {
-        Self {
-            name: tuple.0,
-            reading: tuple.1,
-        }
-    }
-    pub fn name(&self) -> String {
-        self.name.clone()
-    }
-    pub fn reading(&self) -> String {
-        self.reading.clone()
-    }
-}
-
-#[derive(Debug, Clone)]
-#[wasm_bindgen]
-pub struct NameSet {
-    city_name: Name,
-    county_name: Name,
-    subprefecture_name: Name,
-    subprefecture_postfix: Name,
-    government: Name,
-}
-
-#[wasm_bindgen]
-impl NameSet {
-    pub fn city_name(&self) -> Name {
-        self.city_name.clone()
-    }
-
-    pub fn county_name(&self) -> Name {
-        self.county_name.clone()
-    }
-
-    pub fn subprefecture_name(&self) -> Name {
-        self.subprefecture_name.clone()
-    }
-
-    pub fn subprefecture_postfix(&self) -> Name {
-        self.subprefecture_postfix.clone()
-    }
-
-    pub fn government(&self) -> Name {
-        self.government.clone()
-    }
-}
-
-#[wasm_bindgen]
-pub struct MapSite {
-    pub x: f64,
-    pub y: f64,
-}
-
-#[wasm_bindgen]
-#[derive(Debug, Clone)]
-pub struct NetworkNode {
-    transport_node: TransportNode,
-}
-
-#[wasm_bindgen]
-impl NetworkNode {
-    pub fn site(&self) -> MapSite {
-        MapSite {
-            x: self.transport_node.site.x,
-            y: self.transport_node.site.y,
-        }
-    }
-    pub fn stage(&self) -> usize {
-        self.transport_node.stage.as_num()
-    }
-}
-
-#[wasm_bindgen]
-#[derive(Debug, Clone)]
-pub struct NetworkPath {
-    node1: NetworkNode,
-    node2: NetworkNode,
-}
-
-impl NetworkPath {
-    pub fn node1(&self) -> NetworkNode {
-        self.node1.clone()
-    }
-
-    pub fn node2(&self) -> NetworkNode {
-        self.node2.clone()
-    }
 }
 
 #[wasm_bindgen]
@@ -208,7 +107,7 @@ impl StandardMap {
         } else {
             Name::from_tuple(("市".to_string(), "shi".to_string()))
         };
-        let county_name_is_city_name = rnd.gen_bool(0.5) && (government.name != "村");
+        let county_name_is_city_name = rnd.gen_bool(0.5) && (government.name() != "村");
         let county_name = if county_name_is_city_name {
             city_name.clone()
         } else {
@@ -217,8 +116,8 @@ impl StandardMap {
                 cmp_samples: 5,
             })?)
         };
-        let subprefecture_name_is_city_name = (rnd.gen_bool(0.2) && government.name == "市")
-            || (rnd.gen_bool(0.1) && government.name == "町");
+        let subprefecture_name_is_city_name = (rnd.gen_bool(0.2) && government.name() == "市")
+            || (rnd.gen_bool(0.1) && government.name() == "町");
         let subprefecture_name_is_county_name = rnd.gen_bool(0.1);
         let subprefecture_name = if subprefecture_name_is_city_name {
             city_name.clone()
@@ -250,13 +149,13 @@ impl StandardMap {
                 x: bound_max.x,
                 y: bound_max.y,
             },
-            nameset: NameSet {
+            nameset: NameSet::new(
                 city_name,
                 county_name,
                 subprefecture_name,
                 subprefecture_postfix,
                 government,
-            },
+            ),
         })
     }
 
@@ -295,14 +194,10 @@ impl StandardMap {
                 if let Some(iter) = iter {
                     iter.filter_map(|(jnode_id, &jnode)| {
                         if inode_id < jnode_id {
-                            Some(NetworkPath {
-                                node1: NetworkNode {
-                                    transport_node: inode,
-                                },
-                                node2: NetworkNode {
-                                    transport_node: jnode,
-                                },
-                            })
+                            Some(NetworkPath::new(
+                                NetworkNode::new(inode),
+                                NetworkNode::new(jnode),
+                            ))
                         } else {
                             None
                         }
