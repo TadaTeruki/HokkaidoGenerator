@@ -22,6 +22,11 @@ use crate::{
 };
 
 #[wasm_bindgen]
+pub fn create_standard_map(seed: u32, x_expand_prop: f64) -> Option<StandardMap> {
+    StandardMap::new(seed, x_expand_prop)
+}
+
+#[wasm_bindgen]
 #[derive(Debug, Clone)]
 
 pub struct Name {
@@ -79,14 +84,6 @@ impl NameSet {
 }
 
 #[wasm_bindgen]
-pub struct StandardMap {
-    map: Map,
-    bound_min: Site,
-    bound_max: Site,
-    nameset: NameSet,
-}
-
-#[wasm_bindgen]
 pub struct MapSite {
     pub x: f64,
     pub y: f64,
@@ -126,6 +123,14 @@ impl NetworkPath {
     pub fn node2(&self) -> NetworkNode {
         self.node2.clone()
     }
+}
+
+#[wasm_bindgen]
+pub struct StandardMap {
+    map: Map,
+    bound_min: Site,
+    bound_max: Site,
+    nameset: NameSet,
 }
 
 #[wasm_bindgen]

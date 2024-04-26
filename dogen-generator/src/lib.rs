@@ -1,3 +1,6 @@
+use standard_map::StandardMap;
+use wasm_bindgen::prelude::*;
+
 mod map;
 pub mod placename;
 pub mod standard_map;

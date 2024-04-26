@@ -1,23 +1,32 @@
 <script lang="ts">
 	//import { MapLibre } from 'svelte-maplibre';
-    import { StandardMap } from '$lib/engine/dogen_generator.js';
+	import init from '$lib/engine/dogen_generator';
+	import { MapData } from '$lib/map';
 
-    class MapData {
-        map: StandardMap;
+	async function onload() {
+		console.log('onload');
 
-        constructor() {
-            this.map = new StandardMap();
-        }
-    }
+		await init();
 
-    function drawMap() {
-        const canvas = document.getElementById('canvasID') as HTMLCanvasElement;
-        const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-    }
+		const width = 750;
+		const height = 500;
+		const seed = Math.floor(Math.random() * 1000);
 
+		const mapData = new MapData(seed, width / height);
+
+		const canvas = document.getElementById('mapcanvas') as HTMLCanvasElement;
+		canvas.width = width;
+		canvas.height = height;
+
+		console.log('done');
+
+		mapData.drawTerrain(canvas);
+	}
 </script>
 
-<canvas id="map"></canvas>
+<svelte:window on:click={onload} />
+
+<canvas id="mapcanvas"></canvas>
 
 <style>
 </style>
