@@ -1,7 +1,9 @@
 /* tslint:disable */
 /* eslint-disable */
 export const memory: WebAssembly.Memory;
-export function create_standard_map(a: number, b: number): number;
+export function __wbg_elevationbuffer_free(a: number): void;
+export function elevationbuffer_from_terrain(a: number, b: number, c: number): number;
+export function elevationbuffer_get_elevation(a: number, b: number, c: number): number;
 export function __wbg_name_free(a: number): void;
 export function name_name(a: number, b: number): void;
 export function name_reading(a: number, b: number): void;
@@ -20,6 +22,7 @@ export function __wbg_networknode_free(a: number): void;
 export function networknode_site(a: number): number;
 export function networknode_stage(a: number): number;
 export function __wbg_networkpath_free(a: number): void;
+export function create_standard_map(a: number, b: number): number;
 export function __wbg_standardmap_free(a: number): void;
 export function standardmap_get_nameset(a: number): number;
 export function standardmap_get_population(a: number): number;

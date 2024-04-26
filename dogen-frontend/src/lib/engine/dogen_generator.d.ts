@@ -8,6 +8,23 @@
 export function create_standard_map(seed: number, x_expand_prop: number): StandardMap | undefined;
 /**
  */
+export class ElevationBuffer {
+	free(): void;
+	/**
+	 * @param {StandardMap} standard
+	 * @param {number} image_width
+	 * @param {number} image_height
+	 */
+	constructor(standard: StandardMap, image_width: number, image_height: number);
+	/**
+	 * @param {number} x
+	 * @param {number} y
+	 * @returns {number}
+	 */
+	get_elevation(x: number, y: number): number;
+}
+/**
+ */
 export class MapSite {
 	free(): void;
 	/**
@@ -119,7 +136,9 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 
 export interface InitOutput {
 	readonly memory: WebAssembly.Memory;
-	readonly create_standard_map: (a: number, b: number) => number;
+	readonly __wbg_elevationbuffer_free: (a: number) => void;
+	readonly elevationbuffer_from_terrain: (a: number, b: number, c: number) => number;
+	readonly elevationbuffer_get_elevation: (a: number, b: number, c: number) => number;
 	readonly __wbg_name_free: (a: number) => void;
 	readonly name_name: (a: number, b: number) => void;
 	readonly name_reading: (a: number, b: number) => void;
@@ -138,6 +157,7 @@ export interface InitOutput {
 	readonly networknode_site: (a: number) => number;
 	readonly networknode_stage: (a: number) => number;
 	readonly __wbg_networkpath_free: (a: number) => void;
+	readonly create_standard_map: (a: number, b: number) => number;
 	readonly __wbg_standardmap_free: (a: number) => void;
 	readonly standardmap_get_nameset: (a: number) => number;
 	readonly standardmap_get_population: (a: number) => number;

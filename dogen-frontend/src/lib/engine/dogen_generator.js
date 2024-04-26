@@ -26,14 +26,12 @@ function getStringFromWasm0(ptr, len) {
 	ptr = ptr >>> 0;
 	return cachedTextDecoder.decode(getUint8Memory0().subarray(ptr, ptr + len));
 }
-/**
- * @param {number} seed
- * @param {number} x_expand_prop
- * @returns {StandardMap | undefined}
- */
-export function create_standard_map(seed, x_expand_prop) {
-	const ret = wasm.create_standard_map(seed, x_expand_prop);
-	return ret === 0 ? undefined : StandardMap.__wrap(ret);
+
+function _assertClass(instance, klass) {
+	if (!(instance instanceof klass)) {
+		throw new Error(`expected instance of ${klass.name}`);
+	}
+	return instance.ptr;
 }
 
 let cachedInt32Memory0 = null;
@@ -58,6 +56,15 @@ function addHeapObject(obj) {
 
 	heap[idx] = obj;
 	return idx;
+}
+/**
+ * @param {number} seed
+ * @param {number} x_expand_prop
+ * @returns {StandardMap | undefined}
+ */
+export function create_standard_map(seed, x_expand_prop) {
+	const ret = wasm.create_standard_map(seed, x_expand_prop);
+	return ret === 0 ? undefined : StandardMap.__wrap(ret);
 }
 
 let cachedFloat64Memory0 = null;
@@ -103,6 +110,46 @@ function getArrayJsValueFromWasm0(ptr, len) {
 		result.push(takeObject(slice[i]));
 	}
 	return result;
+}
+
+const ElevationBufferFinalization =
+	typeof FinalizationRegistry === 'undefined'
+		? { register: () => {}, unregister: () => {} }
+		: new FinalizationRegistry((ptr) => wasm.__wbg_elevationbuffer_free(ptr >>> 0));
+/**
+ */
+export class ElevationBuffer {
+	__destroy_into_raw() {
+		const ptr = this.__wbg_ptr;
+		this.__wbg_ptr = 0;
+		ElevationBufferFinalization.unregister(this);
+		return ptr;
+	}
+
+	free() {
+		const ptr = this.__destroy_into_raw();
+		wasm.__wbg_elevationbuffer_free(ptr);
+	}
+	/**
+	 * @param {StandardMap} standard
+	 * @param {number} image_width
+	 * @param {number} image_height
+	 */
+	constructor(standard, image_width, image_height) {
+		_assertClass(standard, StandardMap);
+		const ret = wasm.elevationbuffer_from_terrain(standard.__wbg_ptr, image_width, image_height);
+		this.__wbg_ptr = ret >>> 0;
+		return this;
+	}
+	/**
+	 * @param {number} x
+	 * @param {number} y
+	 * @returns {number}
+	 */
+	get_elevation(x, y) {
+		const ret = wasm.elevationbuffer_get_elevation(this.__wbg_ptr, x, y);
+		return ret;
+	}
 }
 
 const MapSiteFinalization =

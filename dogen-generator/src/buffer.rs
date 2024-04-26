@@ -10,6 +10,7 @@ pub struct ElevationBuffer {
 
 #[wasm_bindgen]
 impl ElevationBuffer {
+    #[wasm_bindgen(constructor)]
     pub fn from_terrain(
         standard: &StandardMap,
         image_width: u32,

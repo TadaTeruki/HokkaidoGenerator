@@ -8,8 +8,8 @@
 
 		await init();
 
-		const width = 750;
-		const height = 500;
+		const width = 1200;
+		const height = 600;
 		const seed = Math.floor(Math.random() * 1000);
 
 		const mapData = new MapData(seed, width / height);

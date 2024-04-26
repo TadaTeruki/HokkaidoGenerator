@@ -1,7 +1,7 @@
 // place files you want to import through the `$lib` alias in this folder.
 
 import { Colormap, colorToHex } from './color';
-import { create_standard_map, type StandardMap } from './engine/dogen_generator';
+import { create_standard_map, ElevationBuffer, type StandardMap } from './engine/dogen_generator';
 
 function xorshift(x: number) {
 	x ^= x << 13;
@@ -26,7 +26,7 @@ export class MapData {
 			}
 		})();
 	}
-
+	/*
 	propToMapBoundX(x_prop: number) {
 		return this.map.bound_min().x + (this.map.bound_max().x - this.map.bound_min().x) * x_prop;
 	}
@@ -34,6 +34,7 @@ export class MapData {
 	propToMapBoundY(y_prop: number) {
 		return this.map.bound_min().y + (this.map.bound_max().y - this.map.bound_min().y) * y_prop;
 	}
+    */
 
 	drawTerrain(canvas: HTMLCanvasElement) {
 		const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
@@ -49,12 +50,12 @@ export class MapData {
 			[0.0, 0.1, 0.15, 30.0, 50.0]
 		);
 
+		const elevationBuffer = new ElevationBuffer(this.map, canvas.width, canvas.height);
+
 		let imageData = new ImageData(canvas.width, canvas.height);
 		for (let iy = 0; iy < canvas.height; iy++) {
 			for (let ix = 0; ix < canvas.width; ix++) {
-				const mx = this.propToMapBoundX(ix / canvas.width);
-				const my = this.propToMapBoundY(iy / canvas.height);
-				const elevation = this.map.get_elevation(mx, my) || 0.0;
+				const elevation = elevationBuffer.get_elevation(ix, iy);
 				const color = colormap.getColor(elevation);
 				const index = (iy * canvas.width + ix) * 4;
 				imageData.data[index] = color[0];
