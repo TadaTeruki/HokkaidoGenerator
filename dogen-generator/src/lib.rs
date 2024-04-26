@@ -1,3 +1,4 @@
+pub mod buffer;
 mod map;
 pub mod placename;
 pub mod standard_map;
@@ -6,10 +7,9 @@ pub mod types;
 #[cfg(test)]
 mod tests {
     use rand::Rng;
-    use rayon::prelude::*;
     use tiny_skia::{Paint, PathBuilder, Pixmap, Rect, Stroke, Transform};
 
-    use crate::standard_map::StandardMap;
+    use crate::{buffer::ElevationBuffer, standard_map::StandardMap};
 
     #[test]
     fn test_standard_map() {
@@ -19,8 +19,8 @@ mod tests {
         let x_expand_prop = 1.4;
 
         let standard = &StandardMap::new(seed, x_expand_prop).unwrap();
-        let img_width = (1000.0 * x_expand_prop) as u32;
-        let img_height = 1000;
+        let image_width = (1000.0 * x_expand_prop) as u32;
+        let image_height = 1000;
 
         let address = {
             let subprefecture = format!(
@@ -95,44 +95,33 @@ mod tests {
             land_color
         };
 
-        let img_x_of = |x: f64| -> f64 {
-            (x - standard.bound_min().x) / (standard.bound_max().x - standard.bound_min().x)
-                * img_width as f64
-        };
+        let elevation_buffer = &ElevationBuffer::from_terrain(standard, image_width, image_height);
 
-        let img_y_of = |y: f64| -> f64 {
-            (y - standard.bound_min().y) / (standard.bound_max().y - standard.bound_min().y)
-                * img_height as f64
-        };
-
-        let (bound_min, bound_max) = (standard.bound_min(), standard.bound_max());
-
-        let pixels: Vec<_> = (0..img_width)
-            .into_par_iter()
-            .flat_map(|imgx| {
-                (0..img_height).into_par_iter().filter_map(move |imgy| {
-                    let x = bound_min.x
-                        + (bound_max.x - bound_min.x) * ((imgx as f64 + 0.5) / img_width as f64);
-                    let y = bound_min.y
-                        + (bound_max.y - bound_min.y) * ((imgy as f64 + 0.5) / img_height as f64);
-                    let elevation = standard.get_elevation(x, y);
-                    if let Some(elevation) = elevation {
-                        let color = get_color(elevation);
-                        Some((imgx, imgy, color))
-                    } else {
-                        None
-                    }
-                })
+        let pixels = (0..image_width).flat_map(|imagex| {
+            (0..image_height).map(move |imagey| {
+                let elevation = elevation_buffer.get_elevation(imagex, imagey);
+                let color = get_color(elevation);
+                (imagex, imagey, color)
             })
-            .collect();
+        });
 
-        let mut pixmap = Pixmap::new(img_width, img_height).unwrap();
+        let image_x_of = |x: f64| -> f64 {
+            (x - standard.bound_min().x) / (standard.bound_max().x - standard.bound_min().x)
+                * image_width as f64
+        };
+
+        let image_y_of = |y: f64| -> f64 {
+            (y - standard.bound_min().y) / (standard.bound_max().y - standard.bound_min().y)
+                * image_height as f64
+        };
+
+        let mut pixmap = Pixmap::new(image_width, image_height).unwrap();
         let mut paint = Paint::default();
 
-        for (imgx, imgy, color) in pixels {
+        for (imagex, imagey, color) in pixels {
             paint.set_color_rgba8(color[0], color[1], color[2], 255);
             pixmap.fill_rect(
-                Rect::from_xywh(imgx as f32, imgy as f32, 1.0, 1.0).unwrap(),
+                Rect::from_xywh(imagex as f32, imagey as f32, 1.0, 1.0).unwrap(),
                 &paint,
                 Transform::identity(),
                 None,
@@ -157,12 +146,12 @@ mod tests {
             let path = {
                 let mut path = PathBuilder::new();
                 path.move_to(
-                    img_x_of(inode.site().x) as f32,
-                    img_y_of(inode.site().y) as f32,
+                    image_x_of(inode.site().x) as f32,
+                    image_y_of(inode.site().y) as f32,
                 );
                 path.line_to(
-                    img_x_of(jnode.site().x) as f32,
-                    img_y_of(jnode.site().y) as f32,
+                    image_x_of(jnode.site().x) as f32,
+                    image_y_of(jnode.site().y) as f32,
                 );
                 path.finish().unwrap()
             };
@@ -176,8 +165,8 @@ mod tests {
         let origin = &standard.get_origin_site();
         pixmap.fill_rect(
             Rect::from_xywh(
-                img_x_of(origin.x) as f32 - 2.0,
-                img_y_of(origin.y) as f32 - 2.0,
+                image_x_of(origin.x) as f32 - 2.0,
+                image_y_of(origin.y) as f32 - 2.0,
                 4.0,
                 4.0,
             )
