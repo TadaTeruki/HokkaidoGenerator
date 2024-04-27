@@ -23,22 +23,22 @@ export class Colormap {
 		const weight2 = this.weights[i];
 		const ratio = (value - weight1) / (weight2 - weight1);
 
-        const r = Math.floor(color1[0] * (1 - ratio) + color2[0] * ratio);
-        const g = Math.floor(color1[1] * (1 - ratio) + color2[1] * ratio);
-        const b = Math.floor(color1[2] * (1 - ratio) + color2[2] * ratio);
+		const r = Math.floor(color1[0] * (1 - ratio) + color2[0] * ratio);
+		const g = Math.floor(color1[1] * (1 - ratio) + color2[1] * ratio);
+		const b = Math.floor(color1[2] * (1 - ratio) + color2[2] * ratio);
 
-		return [
-            r,
-            g,
-            b
-		] as [number, number, number];
+		return [r, g, b] as [number, number, number];
 	}
 }
 
-export function blendColors(color1: [number, number, number], color2: [number, number, number], ratio: number) {
-    return [
-        Math.floor(color1[0] * (1 - ratio) + color2[0] * ratio),
-        Math.floor(color1[1] * (1 - ratio) + color2[1] * ratio),
-        Math.floor(color1[2] * (1 - ratio) + color2[2] * ratio)
-    ] as [number, number, number];
+export function blendColors(
+	color1: [number, number, number],
+	color2: [number, number, number],
+	ratio: number
+) {
+	return [
+		Math.floor(color1[0] * (1 - ratio) + color2[0] * ratio),
+		Math.floor(color1[1] * (1 - ratio) + color2[1] * ratio),
+		Math.floor(color1[2] * (1 - ratio) + color2[2] * ratio)
+	] as [number, number, number];
 }

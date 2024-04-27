@@ -1,5 +1,3 @@
-// place files you want to import through the `$lib` alias in this folder.
-
 import { Colormap } from './color';
 import { create_standard_map, ElevationBuffer, type StandardMap } from './engine/dogen_generator';
 
@@ -14,7 +12,7 @@ export class MapData {
 	map: StandardMap;
 
 	constructor(seed: number, x_expand_prop: number) {
-		this.map = (function () {
+		this.map = function () {
 			while (true) {
 				console.log('creating map with seed', seed);
 				const map = create_standard_map(seed, x_expand_prop);
@@ -24,7 +22,7 @@ export class MapData {
 					seed += 1 + (Math.abs(xorshift(seed)) % 100);
 				}
 			}
-		})();
+		}();
 	}
 
 	drawTerrain(canvas: HTMLCanvasElement) {
@@ -43,7 +41,7 @@ export class MapData {
 
 		const elevationBuffer = new ElevationBuffer(this.map, canvas.width, canvas.height);
 
-		let imageData = new ImageData(canvas.width, canvas.height);
+		const imageData = new ImageData(canvas.width, canvas.height);
 		for (let iy = 0; iy < canvas.height; iy++) {
 			for (let ix = 0; ix < canvas.width; ix++) {
 				const elevation = elevationBuffer.get_elevation(ix, iy);

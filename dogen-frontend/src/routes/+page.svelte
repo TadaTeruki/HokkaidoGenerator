@@ -1,15 +1,14 @@
 <script lang="ts">
 	import init from '$lib/engine/dogen_generator';
 	import { MapData } from '$lib/map';
-	import maplibre from 'maplibre-gl';
+	import maplibre, { type StyleSpecification } from 'maplibre-gl';
 	import { onMount } from 'svelte';
 
 	onMount(async () => {
-
 		await init();
-		
-		const width = 500;
-		const height = 500;
+
+		const width = 1000;
+		const height = 1000;
 		const seed = Math.floor(Math.random() * 1000);
 
 		const mapData = new MapData(seed, width / height);
@@ -20,47 +19,47 @@
 
 		mapData.drawTerrain(canvas);
 
-		const url = canvas.toDataURL("image/jpeg");
+		const url = canvas.toDataURL('image/png');
 
-		let map = new maplibre.Map({
+		const mapStyle: StyleSpecification = {
+			version: 8,
+			sources: {
+				'canvas-source': {
+					type: 'image',
+					url,
+					coordinates: [
+						[-1, 1],
+						[1, 1],
+						[1, -1],
+						[-1, -1]
+					]
+				}
+			},
+			layers: [
+				{
+					id: 'canvas-layer',
+					type: 'raster',
+					source: 'canvas-source'
+				}
+			]
+		};
+
+		new maplibre.Map({
 			container: 'map',
-			zoom: 5,
-			minZoom: 4,
-			center: [95.899147, 18.088694],
-			style:
-				'https://api.maptiler.com/maps/streets/style.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL',
+			zoom: 8,
+			minZoom: 7,
+			center: [0, 0],
+			style: mapStyle
 		});
-		map.on('load', () => {
-			map.addSource('canvas-source', {
-				type: 'image',
-				url,
-				coordinates: [
-					[91.4461, 21.5006],
-					[100.3541, 21.5006],
-					[100.3541, 13.9706],
-					[91.4461, 13.9706]
-				],
-			});
-
-			map.addLayer({
-				id: 'canvas-layer',
-				type: 'raster',
-				source: 'canvas-source'
-			});
-		});
-
 	});
 </script>
-<!--
-<canvas id="mapcanvas"></canvas>
--->
+
 <div id="map" />
 
-<style> 
-
-#map {
-	width: 100vw;
-    height: 50vh;
-	background-color: #f8f8f8;
-}
+<style>
+	#map {
+		width: 50vmin;
+		height: 50vmin;
+		background-color: #f8f8f8;
+	}
 </style>
