@@ -10,9 +10,12 @@ function xorshift(x: number) {
 
 export class MapData {
 	map: StandardMap;
+	elevationBuffer: ElevationBuffer;
+	imageWidth: number;
+	imageHeight: number;
 
-	constructor(seed: number, x_expand_prop: number) {
-		this.map = function () {
+	constructor(seed: number, x_expand_prop: number, imageWidth: number, imageHeight: number) {
+		this.map = (function () {
 			while (true) {
 				console.log('creating map with seed', seed);
 				const map = create_standard_map(seed, x_expand_prop);
@@ -22,12 +25,31 @@ export class MapData {
 					seed += 1 + (Math.abs(xorshift(seed)) % 100);
 				}
 			}
-		}();
+		})();
+		this.elevationBuffer = new ElevationBuffer(this.map, imageWidth, imageHeight);
+		this.imageWidth = imageWidth;
+		this.imageHeight = imageHeight;
 	}
 
-	drawTerrain(canvas: HTMLCanvasElement) {
-		const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+	createImage(colormap: Colormap) {
+		const imageData = new ImageData(this.imageWidth, this.imageHeight);
+		for (let iy = 0; iy < this.imageHeight; iy++) {
+			for (let ix = 0; ix < this.imageWidth; ix++) {
+				const elevation = this.elevationBuffer.get_elevation(ix, iy);
+				const color = colormap.getColor(elevation);
+				const index = (iy * this.imageWidth + ix) * 4;
+				imageData.data[index] = color[0];
+				imageData.data[index + 1] = color[1];
+				imageData.data[index + 2] = color[2];
+				imageData.data[index + 3] = 255;
+			}
+		}
 
+		return imageData;
+	}
+
+	drawVisual(canvas: HTMLCanvasElement) {
+		const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
 		const colormap = new Colormap(
 			[
 				[170, 200, 220],
@@ -39,21 +61,21 @@ export class MapData {
 			[0.0, 0.1, 0.15, 40.0, 80.0]
 		);
 
-		const elevationBuffer = new ElevationBuffer(this.map, canvas.width, canvas.height);
+		const imageData = this.createImage(colormap);
+		ctx.putImageData(imageData, 0, 0);
+	}
 
-		const imageData = new ImageData(canvas.width, canvas.height);
-		for (let iy = 0; iy < canvas.height; iy++) {
-			for (let ix = 0; ix < canvas.width; ix++) {
-				const elevation = elevationBuffer.get_elevation(ix, iy);
-				const color = colormap.getColor(elevation);
-				const index = (iy * canvas.width + ix) * 4;
-				imageData.data[index] = color[0];
-				imageData.data[index + 1] = color[1];
-				imageData.data[index + 2] = color[2];
-				imageData.data[index + 3] = 255;
-			}
-		}
+	drawHeightmap(canvas: HTMLCanvasElement) {
+		const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+		const colormap = new Colormap(
+			[
+				[0, 0, 0],
+				[255, 255, 255]
+			],
+			[0.0, 100.0]
+		);
 
+		const imageData = this.createImage(colormap);
 		ctx.putImageData(imageData, 0, 0);
 	}
 }
