@@ -26,12 +26,14 @@ function getStringFromWasm0(ptr, len) {
 	ptr = ptr >>> 0;
 	return cachedTextDecoder.decode(getUint8Memory0().subarray(ptr, ptr + len));
 }
-
-function _assertClass(instance, klass) {
-	if (!(instance instanceof klass)) {
-		throw new Error(`expected instance of ${klass.name}`);
-	}
-	return instance.ptr;
+/**
+ * @param {number} seed
+ * @param {number} x_expand_prop
+ * @returns {StandardMap | undefined}
+ */
+export function create_standard_map(seed, x_expand_prop) {
+	const ret = wasm.create_standard_map(seed, x_expand_prop);
+	return ret === 0 ? undefined : StandardMap.__wrap(ret);
 }
 
 let cachedInt32Memory0 = null;
@@ -41,30 +43,6 @@ function getInt32Memory0() {
 		cachedInt32Memory0 = new Int32Array(wasm.memory.buffer);
 	}
 	return cachedInt32Memory0;
-}
-
-const heap = new Array(128).fill(undefined);
-
-heap.push(undefined, null, true, false);
-
-let heap_next = heap.length;
-
-function addHeapObject(obj) {
-	if (heap_next === heap.length) heap.push(heap.length + 1);
-	const idx = heap_next;
-	heap_next = heap[idx];
-
-	heap[idx] = obj;
-	return idx;
-}
-/**
- * @param {number} seed
- * @param {number} x_expand_prop
- * @returns {StandardMap | undefined}
- */
-export function create_standard_map(seed, x_expand_prop) {
-	const ret = wasm.create_standard_map(seed, x_expand_prop);
-	return ret === 0 ? undefined : StandardMap.__wrap(ret);
 }
 
 let cachedFloat64Memory0 = null;
@@ -85,9 +63,15 @@ function getUint32Memory0() {
 	return cachedUint32Memory0;
 }
 
+const heap = new Array(128).fill(undefined);
+
+heap.push(undefined, null, true, false);
+
 function getObject(idx) {
 	return heap[idx];
 }
+
+let heap_next = heap.length;
 
 function dropObject(idx) {
 	if (idx < 132) return;
@@ -110,6 +94,22 @@ function getArrayJsValueFromWasm0(ptr, len) {
 		result.push(takeObject(slice[i]));
 	}
 	return result;
+}
+
+function _assertClass(instance, klass) {
+	if (!(instance instanceof klass)) {
+		throw new Error(`expected instance of ${klass.name}`);
+	}
+	return instance.ptr;
+}
+
+function addHeapObject(obj) {
+	if (heap_next === heap.length) heap.push(heap.length + 1);
+	const idx = heap_next;
+	heap_next = heap[idx];
+
+	heap[idx] = obj;
+	return idx;
 }
 
 const ElevationBufferFinalization =
@@ -342,6 +342,14 @@ const NetworkNodeFinalization =
 /**
  */
 export class NetworkNode {
+	static __wrap(ptr) {
+		ptr = ptr >>> 0;
+		const obj = Object.create(NetworkNode.prototype);
+		obj.__wbg_ptr = ptr;
+		NetworkNodeFinalization.register(obj, obj.__wbg_ptr, obj);
+		return obj;
+	}
+
 	__destroy_into_raw() {
 		const ptr = this.__wbg_ptr;
 		this.__wbg_ptr = 0;
@@ -387,6 +395,27 @@ export class NetworkPath {
 	free() {
 		const ptr = this.__destroy_into_raw();
 		wasm.__wbg_networkpath_free(ptr);
+	}
+	/**
+	 * @returns {NetworkNode}
+	 */
+	node1() {
+		const ret = wasm.networkpath_node1(this.__wbg_ptr);
+		return NetworkNode.__wrap(ret);
+	}
+	/**
+	 * @returns {NetworkNode}
+	 */
+	node2() {
+		const ret = wasm.networkpath_node2(this.__wbg_ptr);
+		return NetworkNode.__wrap(ret);
+	}
+	/**
+	 * @returns {number}
+	 */
+	stage() {
+		const ret = wasm.networkpath_stage(this.__wbg_ptr);
+		return ret >>> 0;
 	}
 }
 

@@ -15,7 +15,7 @@ export class MapData {
 	imageHeight: number;
 
 	constructor(seed: number, x_expand_prop: number, imageWidth: number, imageHeight: number) {
-		this.map = (function () {
+		this.map = function () {
 			while (true) {
 				console.log('creating map with seed', seed);
 				const map = create_standard_map(seed, x_expand_prop);
@@ -25,7 +25,7 @@ export class MapData {
 					seed += 1 + (Math.abs(xorshift(seed)) % 100);
 				}
 			}
-		})();
+		}();
 		this.elevationBuffer = new ElevationBuffer(this.map, imageWidth, imageHeight);
 		this.imageWidth = imageWidth;
 		this.imageHeight = imageHeight;

@@ -85,6 +85,18 @@ export class NetworkNode {
  */
 export class NetworkPath {
 	free(): void;
+	/**
+	 * @returns {NetworkNode}
+	 */
+	node1(): NetworkNode;
+	/**
+	 * @returns {NetworkNode}
+	 */
+	node2(): NetworkNode;
+	/**
+	 * @returns {number}
+	 */
+	stage(): number;
 }
 /**
  */
@@ -132,6 +144,16 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 
 export interface InitOutput {
 	readonly memory: WebAssembly.Memory;
+	readonly create_standard_map: (a: number, b: number) => number;
+	readonly __wbg_standardmap_free: (a: number) => void;
+	readonly standardmap_get_nameset: (a: number) => number;
+	readonly standardmap_get_population: (a: number) => number;
+	readonly standardmap_bound_min: (a: number) => number;
+	readonly standardmap_bound_max: (a: number) => number;
+	readonly standardmap_get_elevation: (a: number, b: number, c: number, d: number) => void;
+	readonly standardmap_network_paths: (a: number, b: number) => void;
+	readonly standardmap_get_origin_site: (a: number) => number;
+	readonly standardmap_new: (a: number, b: number) => number;
 	readonly __wbg_elevationbuffer_free: (a: number) => void;
 	readonly elevationbuffer_from_terrain: (a: number, b: number, c: number) => number;
 	readonly elevationbuffer_get_elevation: (a: number, b: number, c: number) => number;
@@ -152,16 +174,9 @@ export interface InitOutput {
 	readonly __wbg_networknode_free: (a: number) => void;
 	readonly networknode_site: (a: number) => number;
 	readonly __wbg_networkpath_free: (a: number) => void;
-	readonly create_standard_map: (a: number, b: number) => number;
-	readonly __wbg_standardmap_free: (a: number) => void;
-	readonly standardmap_get_nameset: (a: number) => number;
-	readonly standardmap_get_population: (a: number) => number;
-	readonly standardmap_bound_min: (a: number) => number;
-	readonly standardmap_bound_max: (a: number) => number;
-	readonly standardmap_get_elevation: (a: number, b: number, c: number, d: number) => void;
-	readonly standardmap_network_paths: (a: number, b: number) => void;
-	readonly standardmap_get_origin_site: (a: number) => number;
-	readonly standardmap_new: (a: number, b: number) => number;
+	readonly networkpath_node1: (a: number) => number;
+	readonly networkpath_node2: (a: number) => number;
+	readonly networkpath_stage: (a: number) => number;
 	readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
 	readonly __wbindgen_free: (a: number, b: number, c: number) => void;
 }
