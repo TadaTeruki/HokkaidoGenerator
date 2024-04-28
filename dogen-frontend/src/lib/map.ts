@@ -15,7 +15,7 @@ export class MapData {
 	imageHeight: number;
 
 	constructor(seed: number, x_expand_prop: number, imageWidth: number, imageHeight: number) {
-		this.map = function () {
+		this.map = (function () {
 			while (true) {
 				console.log('creating map with seed', seed);
 				const map = create_standard_map(seed, x_expand_prop);
@@ -25,13 +25,13 @@ export class MapData {
 					seed += 1 + (Math.abs(xorshift(seed)) % 100);
 				}
 			}
-		}();
+		})();
 		this.elevationBuffer = new ElevationBuffer(this.map, imageWidth, imageHeight);
 		this.imageWidth = imageWidth;
 		this.imageHeight = imageHeight;
 	}
 
-	createImage(colormap: Colormap) {
+	createImage(colormap: Colormap, fadeRadius: number) {
 		const imageData = new ImageData(this.imageWidth, this.imageHeight);
 		for (let iy = 0; iy < this.imageHeight; iy++) {
 			for (let ix = 0; ix < this.imageWidth; ix++) {
@@ -41,7 +41,14 @@ export class MapData {
 				imageData.data[index] = color[0];
 				imageData.data[index + 1] = color[1];
 				imageData.data[index + 2] = color[2];
-				imageData.data[index + 3] = 255;
+
+				const alphaSeed = Math.min(
+					Math.min(Math.min(ix, this.imageWidth - ix), Math.min(iy, this.imageHeight - iy)) /
+						fadeRadius,
+					1.0
+				);
+
+				imageData.data[index + 3] = 255 * Math.pow(alphaSeed, 0.8);
 			}
 		}
 
@@ -61,7 +68,7 @@ export class MapData {
 			[0.0, 0.1, 0.15, 40.0, 80.0]
 		);
 
-		const imageData = this.createImage(colormap);
+		const imageData = this.createImage(colormap, 8);
 		ctx.putImageData(imageData, 0, 0);
 	}
 
@@ -75,7 +82,7 @@ export class MapData {
 			[0.0, 100.0]
 		);
 
-		const imageData = this.createImage(colormap);
+		const imageData = this.createImage(colormap, 0);
 		ctx.putImageData(imageData, 0, 0);
 	}
 }

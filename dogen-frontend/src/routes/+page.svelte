@@ -145,20 +145,20 @@
 		};
 
 		const originSite = mapData.map.get_origin_site();
-		const originCoords = [
-			mapXtoProportion(originSite.x),
-			mapYtoProportion(originSite.y)
-	 	] as [number, number];
+		const originCoords = [mapXtoProportion(originSite.x), mapYtoProportion(originSite.y)] as [
+			number,
+			number
+		];
 
 		new maplibre.Map({
 			container: 'map',
-			zoom: (mapData.map.get_population() > 20000) ? 10 : 11,
+			zoom: mapData.map.get_population() > 20000 ? 10 : 11,
 			center: originCoords,
 			style: mapStyle,
 			renderWorldCopies: false,
 			pitch: 40,
 			maxPitch: 85,
-			bearing: (mapData.map.get_initial_angle())/Math.PI*180+45,
+			bearing: (mapData.map.get_initial_angle() / Math.PI) * 180 + 45,
 			antialias: false,
 			preserveDrawingBuffer: true,
 			maxTileCacheZoomLevels: 0
@@ -171,7 +171,6 @@
 <div id="map" />
 
 <style>
-
 	:global(body) {
 		margin: 0;
 		padding: 0;
