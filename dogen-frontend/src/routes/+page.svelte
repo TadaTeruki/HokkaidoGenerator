@@ -19,6 +19,7 @@
 	onMount(async () => {
 		const urlParams = new URLSearchParams(window.location.search);
 		const seedParam = urlParams.get('seed');
+
 		if (seedParam) {
 			isInitial = false;
 			const seed = parseInt(seedParam);
@@ -30,6 +31,7 @@
 	});
 
 	async function generateMap(seed: number) {
+		await new Promise((resolve) => setTimeout(resolve, 300));
 		mapData = await generateMapView(seed);
 		setMap(mapData, seed);
 	}
