@@ -1,16 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
 export const memory: WebAssembly.Memory;
-export function create_standard_map(a: number, b: number): number;
-export function __wbg_standardmap_free(a: number): void;
-export function standardmap_get_nameset(a: number): number;
-export function standardmap_get_population(a: number): number;
-export function standardmap_bound_min(a: number): number;
-export function standardmap_bound_max(a: number): number;
-export function standardmap_get_elevation(a: number, b: number, c: number, d: number): void;
-export function standardmap_network_paths(a: number, b: number): void;
-export function standardmap_get_origin_site(a: number): number;
-export function standardmap_new(a: number, b: number): number;
 export function __wbg_elevationbuffer_free(a: number): void;
 export function elevationbuffer_from_terrain(a: number, b: number, c: number): number;
 export function elevationbuffer_get_elevation(a: number, b: number, c: number): number;
@@ -34,5 +24,16 @@ export function __wbg_networkpath_free(a: number): void;
 export function networkpath_node1(a: number): number;
 export function networkpath_node2(a: number): number;
 export function networkpath_stage(a: number): number;
+export function create_standard_map(a: number, b: number): number;
+export function __wbg_standardmap_free(a: number): void;
+export function standardmap_get_nameset(a: number): number;
+export function standardmap_get_population(a: number): number;
+export function standardmap_bound_min(a: number): number;
+export function standardmap_bound_max(a: number): number;
+export function standardmap_get_elevation(a: number, b: number, c: number, d: number): void;
+export function standardmap_network_paths(a: number, b: number): void;
+export function standardmap_get_origin_site(a: number): number;
+export function standardmap_get_initial_angle(a: number): number;
+export function standardmap_new(a: number, b: number): number;
 export function __wbindgen_add_to_stack_pointer(a: number): number;
 export function __wbindgen_free(a: number, b: number, c: number): void;

@@ -4,18 +4,11 @@
 	import maplibre, { type StyleSpecification } from 'maplibre-gl';
 	import { onMount } from 'svelte';
 
-	// convert bound values in range [-1, 1] to coordinates of mercator projection
-	function mercator(x: number, y: number) {
-		const lat = (y / Math.PI) * 180;
-		const lon = (x / Math.PI) * 180;
-		return [lon, lat];
-	}
-
 	onMount(async () => {
 		await init();
 
-		const width = 500;
-		const height = 500;
+		const width = 700;
+		const height = 700;
 		const seed = Math.floor(Math.random() * 10000);
 
 		const mapData = new MapData(seed, width / height, width, height);
@@ -30,17 +23,13 @@
 		heightmap.height = height;
 		mapData.drawHeightmap(heightmap);
 
-		const scale = 0.05;
-
 		let highwayFeature = [] as GeoJSON.Feature[];
 		let streetFeature = [] as GeoJSON.Feature[];
 
 		const bound_x = mapData.map.bound_max().x - mapData.map.bound_min().x;
-		const mapXtoProportion = (x: number) =>
-			((x + 0.5 - mapData.map.bound_min().x) / bound_x) * scale;
+		const mapXtoProportion = (x: number) => (x + 0.5 - mapData.map.bound_min().x) / bound_x;
 		const bound_y = mapData.map.bound_max().y - mapData.map.bound_min().y;
-		const mapYtoProportion = (y: number) =>
-			((-y + 0.5 - mapData.map.bound_min().y) / bound_y) * scale;
+		const mapYtoProportion = (y: number) => (-y + 0.5 - mapData.map.bound_min().y) / bound_y;
 
 		mapData.map.network_paths().map((path) => {
 			const node1 = path.node1();
@@ -51,8 +40,8 @@
 				geometry: {
 					type: 'LineString',
 					coordinates: [
-						mercator(mapXtoProportion(node1.site().x), mapYtoProportion(node1.site().y)),
-						mercator(mapXtoProportion(node2.site().x), mapYtoProportion(node2.site().y))
+						[mapXtoProportion(node1.site().x), mapYtoProportion(node1.site().y)],
+						[mapXtoProportion(node2.site().x), mapYtoProportion(node2.site().y)]
 					]
 				}
 			} as GeoJSON.Feature;
@@ -65,10 +54,10 @@
 		});
 
 		const imageCoords = [
-			mercator(0.0, scale),
-			mercator(scale, scale),
-			mercator(scale, 0.0),
-			mercator(0.0, 0.0)
+			[0.0, 1.0],
+			[1.0, 1.0],
+			[1.0, 0.0],
+			[0.0, 0.0]
 		] as [[number, number], [number, number], [number, number], [number, number]];
 
 		const mapStyle: StyleSpecification = {
@@ -156,18 +145,21 @@
 		};
 
 		const originSite = mapData.map.get_origin_site();
-		const originCoords = mercator(
+		const originCoords = [
 			mapXtoProportion(originSite.x),
 			mapYtoProportion(originSite.y)
-		) as [number, number];
+	 	] as [number, number];
 
 		new maplibre.Map({
 			container: 'map',
-			zoom: 8,
+			zoom: (mapData.map.get_population() > 20000) ? 10 : 11,
 			center: originCoords,
 			style: mapStyle,
 			renderWorldCopies: false,
+			pitch: 40,
 			maxPitch: 85,
+			bearing: (mapData.map.get_initial_angle())/Math.PI*180+45,
+			antialias: false,
 			preserveDrawingBuffer: true,
 			maxTileCacheZoomLevels: 0
 		});
@@ -179,9 +171,15 @@
 <div id="map" />
 
 <style>
+
+	:global(body) {
+		margin: 0;
+		padding: 0;
+	}
+
 	#map {
 		width: 80vmin;
-		height: 80vmin;
+		height: 100vh;
 		background-color: #f8f8f8;
 	}
 </style>
