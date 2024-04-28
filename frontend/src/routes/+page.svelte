@@ -19,23 +19,19 @@
 	let isInitial = false;
 	let presentationMode = false;
 
-	function getSeed() {
-		const urlParams = new URLSearchParams(location.search);
-		const seedParam = urlParams.get('seed');
-		return seedParam ? parseInt(seedParam) : undefined;
-	}
-
 	// onload
 	onMount(async () => {
 		await initWasm();
 		dataset = await getDataset();
-		seed = getSeed();
+
+		const urlParams = new URLSearchParams(location.search);
+		presentationMode = urlParams.get('presentation') === 'true';
+		const seedParam = urlParams.get('seed');
+		seed = seedParam ? parseInt(seedParam) : undefined;
 		if (seed === undefined) {
 			isInitial = true;
 			return;
 		}
-		const urlParams = new URLSearchParams(location.search);
-		presentationMode = urlParams.get('presentation') === 'true';
 
 		generateMap();
 	});
