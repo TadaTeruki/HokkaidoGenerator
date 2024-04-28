@@ -125,6 +125,7 @@
 		font-family: 'Zen Kaku Gothic New', sans-serif;
 		width: 100vw;
 		height: 100vh;
+		overflow: hidden;
 	}
 
 	#map {
@@ -143,7 +144,8 @@
 	}
 
 	/* responsive for mobile */
-	@media (max-width: 768px) {
+	/* if the screen width is less than its height, it is considered as mobile */
+	@media (max-aspect-ratio: 1/1) {
 		:global(body) {
 			flex-direction: column;
 		}
