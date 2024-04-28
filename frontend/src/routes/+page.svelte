@@ -12,10 +12,10 @@
 	let address: string = '';
 	let population: string = '';
 
-	const initialSeed = 0;
+	const initialSeed = -1;
 	let dataset: string = '';
 	let seed: number | undefined = undefined;
-	let isInitial = true;
+	let isInitial = false;
 
 	function getSeed() {
 		const urlParams = new URLSearchParams(location.search);
@@ -28,22 +28,23 @@
 		await initWasm();
 		dataset = await getDataset();
 		seed = getSeed();
+		if (seed === undefined) {
+			isInitial = true;
+			return;
+		}
 		generateMap();
 	});
 
 	function generateMap() {
 		setTimeout(function () {
-			let first = false;
 			if (seed === undefined) {
-				seed = initialSeed;
-				first = true;
+				return;
 			}
 
 			mapData = generateMapView(seed, dataset);
-			if (!first) {
-				isInitial = false;
-				history.replaceState(null, '', `/?seed=${seed}`);
-			}
+			isInitial = false;
+			history.replaceState(null, '', `/?seed=${seed}`);
+		
 			setMap(mapData);
 		}, 300);
 	}
