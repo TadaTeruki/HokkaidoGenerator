@@ -6,6 +6,8 @@ Website: **[hokkaidogenerator.peruki.dev/](https://hokkaidogenerator.peruki.dev/
 
 ![HokkaidoGenerator](https://github.com/TadaTeruki/HokkaidoGenerator/assets/69315285/40685a5f-f91d-48a5-8551-54113ee9044d)
 
+![Screenshot](https://github.com/TadaTeruki/HokkaidoGenerator/assets/69315285/a8409246-99fc-4e7d-acbe-bca2adb36e93)
+
 ## ビルド方法
 
 ```
