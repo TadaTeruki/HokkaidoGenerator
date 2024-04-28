@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { MapData } from '$lib/map';
-	import { generateMapView } from '$lib/view';
+	import { generateMapView, getDataset, initWasm } from '$lib/view';
 	import { toKana } from 'wanakana';
 	import { onMount } from 'svelte';
 	import Cityinfo from '../components/cityinfo.svelte';
@@ -13,30 +13,42 @@
 	let population: string = '';
 
 	const initialSeed = 0;
+	let dataset: string = '';
+	let seed: number | undefined = undefined;
 	let isInitial = true;
+
+	function getSeed() {
+		const urlParams = new URLSearchParams(location.search);
+		const seedParam = urlParams.get('seed');
+		return seedParam ? parseInt(seedParam) : undefined;
+	}
 
 	// onload
 	onMount(async () => {
-		const urlParams = new URLSearchParams(window.location.search);
-		const seedParam = urlParams.get('seed');
-
-		if (seedParam) {
-			isInitial = false;
-			const seed = parseInt(seedParam);
-			generateMap(seed);
-		} else {
-			isInitial = true;
-			generateMap(initialSeed);
-		}
+		await initWasm();
+		dataset = await getDataset();
+		seed = getSeed();
+		generateMap();
 	});
 
-	async function generateMap(seed: number) {
-		await new Promise((resolve) => setTimeout(resolve, 300));
-		mapData = await generateMapView(seed);
-		setMap(mapData, seed);
+	function generateMap() {
+		setTimeout(function () {
+			let first = false;
+			if (seed === undefined) {
+				seed = initialSeed;
+				first = true;
+			}
+
+			mapData = generateMapView(seed, dataset);
+			if (!first) {
+				isInitial = false;
+				history.replaceState(null, '', `/?seed=${seed}`);
+			}
+			setMap(mapData);
+		}, 300);
 	}
 
-	function setMap(mapData: MapData, seed: number) {
+	function setMap(mapData: MapData) {
 		cityName = [
 			mapData.map.get_nameset().city_name().name(),
 			toKana(mapData.map.get_nameset().city_name().reading())
@@ -57,21 +69,26 @@
 			mapData.map.get_nameset().government().name();
 
 		population = '市街人口: ' + mapData.map.get_population().toLocaleString() + '人';
-
-		history.replaceState(null, '', `/?seed=${seed}`);
 	}
 
 	async function newMap() {
-		const seed = Math.floor(Math.random() * 1000000) + 1 + initialSeed;
-		await generateMap(seed);
-		isInitial = false;
+		seed = Math.floor(Math.random() * 1000000) + 1 + initialSeed;
+		await generateMap();
+	}
+
+	async function resetPage() {
+		isInitial = true;
+		history.replaceState(null, '', '/');
+		location.reload();
 	}
 </script>
 
 <div id="map" />
 
 <div id="right">
-	<header id="header">Hokkaido Generator -北海道ジェネレータ-</header>
+	<header id="header">
+		<a href="/" on:click={resetPage}> Hokkaido Generator -北海道ジェネレータ- </a>
+	</header>
 	<div id="control">
 		{#if isInitial}
 			<Introduction />

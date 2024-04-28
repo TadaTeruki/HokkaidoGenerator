@@ -2,12 +2,17 @@ import init from '$lib/engine/dogen_generator';
 import { MapData } from '$lib/map';
 import maplibre, { type StyleSpecification } from 'maplibre-gl';
 
-export async function generateMapView(seed: number) {
+export async function initWasm() {
 	await init();
+}
+
+export async function getDataset() {
+	return await fetch('/dataset/placenames.csv').then((response) => response.text());
+}
+
+export function generateMapView(seed: number, dataset: string) {
 	const width = 700;
 	const height = 700;
-
-	const dataset = await fetch('/dataset/placenames.csv').then((response) => response.text());
 	const mapData = new MapData(seed, width / height, width, height, dataset);
 
 	const visual = document.createElement('canvas');
