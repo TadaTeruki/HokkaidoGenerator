@@ -3,6 +3,7 @@
 	import { generateMapView } from '$lib/view';
 	import { toKana } from 'wanakana';
 	import { onMount } from 'svelte';
+	import Cityinfo from '../components/cityinfo.svelte';
 
 	let mapData: MapData | null = null;
 
@@ -10,7 +11,7 @@
 	let address: string = '';
 	let population: string = '';
 
-	onMount(reloadMap);
+	//onMount(reloadMap);
 
 	async function reloadMap() {
 		mapData = await generateMapView();
@@ -40,16 +41,7 @@
 <div id="map" />
 
 <div id="control">
-	<div class="citynamebox-outer">
-		<div class="citynamebox-inner">
-			<div class="citykana">{cityName[1] || ''}</div>
-			<div class="cityname">{cityName[0] || ''}</div>
-		</div>
-		<span class="citypostfix">{cityName[0] ? '市街' : ''}</span>
-		<br />
-	</div>
-	<div class="address">{address}</div>
-	<div class="population">{population}</div>
+	<Cityinfo {cityName} {address} {population} />
 	<button on:click={reloadMap} id="generateButton">新しく生成</button>
 </div>
 
@@ -58,63 +50,29 @@
 
 	:global(body) {
 		margin: 0;
-		padding: 0;
 		display: flex;
 		align-items: center;
 		font-family: 'Zen Kaku Gothic New', sans-serif;
+		width: 100vw;
+		height: 100vh;
 	}
 
 	#map {
-		width: 50vw;
-		height: 100vh;
-		background-color: #f8f8f8;
+		width: 50%;
+		height: 100%;
+		background-color: #f0f0f0;
+		display: flex;
+		align-items: center;
 	}
 
 	#control {
-		width: 50vw;
-		height: 100vh;
+		width: 50%;
+		height: 100%;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
 		gap: 0.5rem;
-	}
-
-	.cityname {
-		font-size: 4rem;
-		color: #333;
-	}
-
-	.citypostfix {
-		font-size: 2rem;
-		color: #888;
-	}
-
-	.citynamebox-outer {
-		display: flex;
-		flex-direction: row;
-		align-items: end;
-	}
-
-	.citynamebox-inner {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-	}
-
-	.citykana {
-		font-size: 1.5rem;
-		color: #888;
-	}
-
-	.address {
-		font-size: 1rem;
-		color: #888;
-	}
-
-	.population {
-		font-size: 1rem;
-		color: #888;
 	}
 
 	button {

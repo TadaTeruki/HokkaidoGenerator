@@ -159,6 +159,7 @@ export async function generateMapView() {
 		zoom: mapData.map.get_population() > 20000 ? 10.5 : 11,
 		center: originCoords,
 		style: mapStyle,
+		attributionControl: false,
 		renderWorldCopies: false,
 		pitch: 40,
 		maxPitch: 85,
