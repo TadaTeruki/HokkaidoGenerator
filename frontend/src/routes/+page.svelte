@@ -44,7 +44,7 @@
 			mapData = generateMapView(seed, dataset);
 			isInitial = false;
 			history.replaceState(null, '', `/?seed=${seed}`);
-		
+
 			setMap(mapData);
 		}, 300);
 	}
@@ -109,6 +109,7 @@
 	:global(body) {
 		margin: 0;
 		display: flex;
+		flex-direction: row;
 		align-items: center;
 		font-family: 'Zen Kaku Gothic New', sans-serif;
 		width: 100vw;
@@ -128,6 +129,23 @@
 		height: 100%;
 		display: flex;
 		flex-direction: column;
+	}
+
+	/* responsive for mobile */
+	@media (max-width: 768px) {
+		:global(body) {
+			flex-direction: column;
+		}
+
+		#map {
+			width: 100%;
+			height: 50%;
+		}
+
+		#right {
+			width: 100%;
+			height: 50%;
+		}
 	}
 
 	#control {
