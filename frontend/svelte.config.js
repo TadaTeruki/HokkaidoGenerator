@@ -1,4 +1,3 @@
-
 import adapter from '@sveltejs/adapter-cloudflare';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
@@ -15,6 +14,5 @@ const config = {
 		adapter: adapter()
 	}
 };
-
 
 export default config;
