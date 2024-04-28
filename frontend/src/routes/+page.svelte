@@ -56,7 +56,7 @@
 			);
 
 			setMap(mapData);
-		}, 300);
+		}, 150);
 	}
 
 	function setMap(mapData: MapData) {
