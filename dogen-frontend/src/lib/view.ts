@@ -2,12 +2,10 @@ import init from '$lib/engine/dogen_generator';
 import { MapData } from '$lib/map';
 import maplibre, { type StyleSpecification } from 'maplibre-gl';
 
-export async function generateMapView() {
+export async function generateMapView(seed: number) {
 	await init();
 	const width = 700;
 	const height = 700;
-
-	const seed = Math.floor(Math.random() * 10000);
 
 	const dataset = await fetch('/dataset/placenames.csv').then((response) => response.text());
 	const mapData = new MapData(seed, width / height, width, height, dataset);
