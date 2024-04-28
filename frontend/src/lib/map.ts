@@ -1,5 +1,9 @@
 import { Colormap } from './color';
-import { create_standard_map, ElevationBuffer, type StandardMap } from './engine/dogen_generator';
+import {
+	create_standard_map,
+	ElevationBuffer,
+	type StandardMap
+} from './engine/hokkaido_generator';
 
 function xorshift(x: number) {
 	x ^= x << 13;

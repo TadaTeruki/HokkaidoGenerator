@@ -1,4 +1,4 @@
-import init from '$lib/engine/dogen_generator';
+import init from '$lib/engine/hokkaido_generator';
 import { MapData } from '$lib/map';
 import maplibre, { type StyleSpecification } from 'maplibre-gl';
 
