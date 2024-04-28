@@ -4,12 +4,13 @@ import maplibre, { type StyleSpecification } from 'maplibre-gl';
 
 export async function generateMap() {
 	await init();
-
 	const width = 700;
 	const height = 700;
+
 	const seed = Math.floor(Math.random() * 10000);
 
-	const mapData = new MapData(seed, width / height, width, height);
+	const dataset = await fetch('/dataset/placenames.csv').then((response) => response.text());
+	const mapData = new MapData(seed, width / height, width, height, dataset);
 
 	const visual = document.createElement('canvas');
 	visual.width = width;
@@ -148,16 +149,23 @@ export async function generateMap() {
 		number
 	];
 
+	const map = document.getElementById('map');
+	if (map) {
+		map.innerHTML = '';
+	}
+
 	new maplibre.Map({
 		container: 'map',
-		zoom: mapData.map.get_population() > 20000 ? 10 : 11,
+		zoom: mapData.map.get_population() > 20000 ? 10.5 : 11,
 		center: originCoords,
 		style: mapStyle,
 		renderWorldCopies: false,
 		pitch: 40,
 		maxPitch: 85,
-		bearing: (mapData.map.get_initial_angle() / Math.PI) * 180 + 45,
+		bearing: (mapData.map.get_initial_angle() / Math.PI) * 180 + 45 * (seed % 2 ? 1 : -1),
 		antialias: false,
 		preserveDrawingBuffer: true
 	});
+
+	return mapData;
 }

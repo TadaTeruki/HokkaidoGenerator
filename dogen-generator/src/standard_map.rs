@@ -20,8 +20,12 @@ use crate::{
 };
 
 #[wasm_bindgen]
-pub fn create_standard_map(seed: u32, x_expand_prop: f64) -> Option<StandardMap> {
-    StandardMap::new(seed, x_expand_prop)
+pub fn create_standard_map(
+    seed: u32,
+    x_expand_prop: f64,
+    dataset: String,
+) -> Option<StandardMap> {
+    StandardMap::new(seed, x_expand_prop, dataset)
 }
 
 #[wasm_bindgen]
@@ -57,7 +61,7 @@ impl StandardMap {
         Ok(map)
     }
 
-    pub fn new(seed: u32, x_expand_prop: f64) -> Option<StandardMap> {
+    pub fn new(seed: u32, x_expand_prop: f64, dataset: String) -> Option<StandardMap> {
         let mut rnd = StdRng::seed_from_u64(seed as u64);
         let land_ratio = rnd.gen_range(0.5..1.0);
         let city_size_prop_min = 0.01;
@@ -67,8 +71,7 @@ impl StandardMap {
             * land_ratio;
 
         println!("city_size_prop: {}", city_size_prop);
-        let mut namegen =
-            NameGenerator::new(include_str!("../dataset/placenames.csv"), seed as usize);
+        let mut namegen = NameGenerator::new(dataset.as_str(), seed as usize);
         let city_name = Name::from_tuple(namegen.generate(NameConfig {
             target_name_length: 3.1 - city_size_prop * 20.0,
             cmp_samples: 5,

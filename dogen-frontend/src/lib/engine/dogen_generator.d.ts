@@ -3,9 +3,14 @@
 /**
  * @param {number} seed
  * @param {number} x_expand_prop
+ * @param {string} dataset
  * @returns {StandardMap | undefined}
  */
-export function create_standard_map(seed: number, x_expand_prop: number): StandardMap | undefined;
+export function create_standard_map(
+	seed: number,
+	x_expand_prop: number,
+	dataset: string
+): StandardMap | undefined;
 /**
  */
 export class ElevationBuffer {
@@ -105,9 +110,10 @@ export class StandardMap {
 	/**
 	 * @param {number} seed
 	 * @param {number} x_expand_prop
+	 * @param {string} dataset
 	 * @returns {StandardMap | undefined}
 	 */
-	static new(seed: number, x_expand_prop: number): StandardMap | undefined;
+	static new(seed: number, x_expand_prop: number, dataset: string): StandardMap | undefined;
 	/**
 	 * @returns {NameSet}
 	 */
@@ -171,7 +177,7 @@ export interface InitOutput {
 	readonly networkpath_node1: (a: number) => number;
 	readonly networkpath_node2: (a: number) => number;
 	readonly networkpath_stage: (a: number) => number;
-	readonly create_standard_map: (a: number, b: number) => number;
+	readonly create_standard_map: (a: number, b: number, c: number, d: number) => number;
 	readonly __wbg_standardmap_free: (a: number) => void;
 	readonly standardmap_get_nameset: (a: number) => number;
 	readonly standardmap_get_population: (a: number) => number;
@@ -181,9 +187,11 @@ export interface InitOutput {
 	readonly standardmap_network_paths: (a: number, b: number) => void;
 	readonly standardmap_get_origin_site: (a: number) => number;
 	readonly standardmap_get_initial_angle: (a: number) => number;
-	readonly standardmap_new: (a: number, b: number) => number;
+	readonly standardmap_new: (a: number, b: number, c: number, d: number) => number;
 	readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
 	readonly __wbindgen_free: (a: number, b: number, c: number) => void;
+	readonly __wbindgen_malloc: (a: number, b: number) => number;
+	readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
 }
 
 export type SyncInitInput = BufferSource | WebAssembly.Module;
