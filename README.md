@@ -1,18 +1,34 @@
 # Hokkaido Generator - 北海道ジェネレータ -
 
+Website: **[hokkaidogenerator.peruki.dev/](https://hokkaidogenerator.peruki.dev/)**
+
+実在しない北海道の市街を自動生成します。
+
 ![HokkaidoGenerator](https://github.com/TadaTeruki/HokkaidoGenerator/assets/69315285/40685a5f-f91d-48a5-8551-54113ee9044d)
 
-実在しない北海道の地名を自動生成
+## ビルド方法
+
+```
+$ cd frontend
+$ bun i
+$ bun run dev
+```
+
+シミュレータ部分の更新は以下のコマンドで行います。
+
+```
+$ cd generator
+$ make
+```
 
 ## 技術構成
 
-Rustで開発した生成アルゴリズムをWebAssemblyビルドし、TypeScript側で表示する形式。
+Rustで開発したシミュレータをWebAssemblyビルドし、TypeScript側で表示する形式。
 
 ### フロントエンド
 
 言語: TypeScript <br>
 開発環境: Svelte + SvelteKit <br>
-パッケージマネージャ: bun
 
 地図の表示にはMaplibre GL JSを利用。
 
@@ -64,6 +80,8 @@ source: https://github.com/TadaTeruki/fastlem
 
 [^1]: 山田秀三. 北海道の地名. 草風館, 2000.
 
-## 権利表記
+## ライセンス・権利表示
+
+ライセンス: MPL-2.0
 
 Copyright (c) 2024 Teruki TADA
