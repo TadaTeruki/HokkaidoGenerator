@@ -11,6 +11,7 @@
 	let cityName: [string, string] = ['', ''];
 	let address: string = '';
 	let population: string = '';
+	let isLoading = false;
 
 	const initialSeed = -1;
 	let dataset: string = '';
@@ -40,12 +41,13 @@
 	});
 
 	function generateMap() {
+		isLoading = true;
 		setTimeout(function () {
 			if (seed === undefined) {
 				return;
 			}
-
 			mapData = generateMapView(seed, dataset);
+			isLoading = false;
 			isInitial = false;
 			history.replaceState(
 				null,
@@ -104,7 +106,14 @@
 		{:else}
 			<Cityinfo {cityName} {address} {population} />
 		{/if}
-		<button on:click={newMap} id="generateButton">新しく生成</button>
+
+		<button on:click={newMap} id="generateButton" disabled={isLoading}>
+			{#if isLoading}
+				loading...
+			{:else}
+				新しく生成
+			{/if}
+		</button>
 		{#if presentationMode}
 			<img src="/QR.png" alt="共有" id="qr" />
 		{/if}
