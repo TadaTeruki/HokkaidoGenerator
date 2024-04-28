@@ -217,6 +217,10 @@ impl StandardMap {
         }
     }
 
+    pub fn get_initial_angle(&self) -> f64 {
+        self.map.initial_angle
+    }
+
     fn rules_fn(
         elevation: f64,
         population_density: f64,

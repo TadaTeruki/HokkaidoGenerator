@@ -111,6 +111,7 @@ pub struct NetworkPath {
     node2: NetworkNode,
 }
 
+#[wasm_bindgen]
 impl NetworkPath {
     pub(crate) fn new(node1: NetworkNode, node2: NetworkNode) -> Self {
         Self { node1, node2 }
