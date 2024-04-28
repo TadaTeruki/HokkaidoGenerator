@@ -2,7 +2,7 @@ import init from '$lib/engine/dogen_generator';
 import { MapData } from '$lib/map';
 import maplibre, { type StyleSpecification } from 'maplibre-gl';
 
-export async function generateMap() {
+export async function generateMapView() {
 	await init();
 	const width = 700;
 	const height = 700;
