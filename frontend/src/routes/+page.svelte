@@ -189,13 +189,6 @@
 		color: #aaa;
 	}
 
-	#footer {
-		font-size: 1rem;
-		color: #888;
-		text-align: center;
-		margin: 1.5rem auto;
-	}
-
 	a {
 		color: #888;
 		border-bottom: 0.5px solid #888;
