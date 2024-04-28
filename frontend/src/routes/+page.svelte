@@ -98,7 +98,8 @@
 
 <div id="right">
 	<header id="header">
-		<a href="/" on:click={resetPage}> Hokkaido Generator -北海道ジェネレータ- </a>
+		<a href="/" on:click={resetPage}> Hokkaido Generator 北海道ジェネレータ </a> |
+		<a href="https://github.com/TadaTeruki/HokkaidoGenerator">GitHub</a>
 	</header>
 	<div id="control">
 		{#if isInitial}
@@ -118,9 +119,6 @@
 			<img src="/QR.png" alt="共有" id="qr" />
 		{/if}
 	</div>
-	<footer id="footer">
-		<a href="https://github.com/TadaTeruki/HokkaidoGenerator">GitHub</a>
-	</footer>
 </div>
 
 <style>
