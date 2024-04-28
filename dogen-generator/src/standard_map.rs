@@ -20,11 +20,7 @@ use crate::{
 };
 
 #[wasm_bindgen]
-pub fn create_standard_map(
-    seed: u32,
-    x_expand_prop: f64,
-    dataset: String,
-) -> Option<StandardMap> {
+pub fn create_standard_map(seed: u32, x_expand_prop: f64, dataset: String) -> Option<StandardMap> {
     StandardMap::new(seed, x_expand_prop, dataset)
 }
 

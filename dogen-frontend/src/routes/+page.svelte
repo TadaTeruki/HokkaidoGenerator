@@ -1,17 +1,21 @@
 <script lang="ts">
 	import { generateMap } from '$lib/generator';
 	import type { MapData } from '$lib/map';
+	import { toKana } from 'wanakana';
 	import { onMount } from 'svelte';
 
 	let mapData: MapData | null = null;
 
-	let cityName: string = '';
+	let cityName: [string,string] = ['', ''];
 
 	onMount(reloadMap);
 
 	async function reloadMap() {
 		mapData = await generateMap();
-		cityName = mapData.map.get_nameset().city_name().name();
+		cityName = [
+			mapData.map.get_nameset().city_name().name(),
+			toKana(mapData.map.get_nameset().city_name().reading())
+		];
 	}
 </script>
 
@@ -19,8 +23,10 @@
 
 <div id="control">
 	<div class="cityname">
-		{cityName || ''}
-		<span class="citypostfix">{cityName ? '市街' : ''}</span>
+		{cityName[0] || ''}
+		<span class="citypostfix">{cityName[0] ? '市街' : ''}</span>
+		<br>
+		<span class="citypostfix">{cityName[1] || ''}</span>
 	</div>
 	<button on:click={reloadMap}>Regenerate</button>
 </div>
