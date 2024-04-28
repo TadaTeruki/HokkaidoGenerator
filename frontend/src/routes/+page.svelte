@@ -16,6 +16,7 @@
 	let dataset: string = '';
 	let seed: number | undefined = undefined;
 	let isInitial = false;
+	let presentationMode = false;
 
 	function getSeed() {
 		const urlParams = new URLSearchParams(location.search);
@@ -32,6 +33,9 @@
 			isInitial = true;
 			return;
 		}
+		const urlParams = new URLSearchParams(location.search);
+		presentationMode = urlParams.get('presentation') === 'true';
+
 		generateMap();
 	});
 
@@ -43,7 +47,11 @@
 
 			mapData = generateMapView(seed, dataset);
 			isInitial = false;
-			history.replaceState(null, '', `/?seed=${seed}`);
+			history.replaceState(
+				null,
+				'',
+				`/?seed=${seed}${presentationMode ? '&presentation=true' : ''}`
+			);
 
 			setMap(mapData);
 		}, 300);
@@ -97,6 +105,9 @@
 			<Cityinfo {cityName} {address} {population} />
 		{/if}
 		<button on:click={newMap} id="generateButton">新しく生成</button>
+		{#if presentationMode}
+			<img src="/QR.png" alt="共有" id="qr" />
+		{/if}
 	</div>
 	<footer id="footer">
 		<a href="https://github.com/TadaTeruki/HokkaidoGenerator">GitHub</a>
@@ -210,5 +221,11 @@
 		100% {
 			background-color: #888;
 		}
+	}
+
+	#qr {
+		width: 18rem;
+		height: 18rem;
+		margin-top: 1rem;
 	}
 </style>
