@@ -5,8 +5,10 @@
 	import { onMount } from 'svelte';
 	import Cityinfo from '../components/cityinfo.svelte';
 	import Introduction from '../components/introduction.svelte';
+	import maplibre from 'maplibre-gl';
 
 	let mapData: MapData | null = null;
+	let maplibreMap: maplibre.Map | null = null;
 
 	let cityName: [string, string] = ['', ''];
 	let address: string = '';
@@ -42,7 +44,7 @@
 			if (seed === undefined) {
 				return;
 			}
-			mapData = generateMapView(seed, dataset);
+			[mapData, maplibreMap] = generateMapView(seed, dataset) as [MapData, maplibre.Map];
 			isLoading = false;
 			isInitial = false;
 			history.replaceState(
@@ -80,7 +82,7 @@
 
 	async function newMap() {
 		seed = Math.floor(Math.random() * 1000000) + 1 + initialSeed;
-		await generateMap();
+		generateMap();
 	}
 
 	async function resetPage() {
@@ -101,7 +103,7 @@
 		{#if isInitial}
 			<Introduction />
 		{:else}
-			<Cityinfo {cityName} {address} {population} />
+			<Cityinfo {cityName} {address} {population} {seed} {maplibreMap} />
 		{/if}
 
 		<button on:click={newMap} id="generateButton" disabled={isLoading}>
@@ -118,7 +120,7 @@
 </div>
 
 <style>
-	@import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New?weight=500&display=swap');
+	@import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500&display=swap');
 
 	:global(body) {
 		margin: 0;
@@ -128,7 +130,6 @@
 		font-family: 'Zen Kaku Gothic New', sans-serif;
 		width: 100vw;
 		height: 100vh;
-		overflow: hidden;
 	}
 
 	#map {

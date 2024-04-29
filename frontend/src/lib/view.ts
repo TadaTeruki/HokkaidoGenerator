@@ -152,12 +152,12 @@ export function generateMapView(seed: number, dataset: string) {
 		number
 	];
 
-	const map = document.getElementById('map');
-	if (map) {
-		map.innerHTML = '';
+	const mapElement = document.getElementById('map');
+	if (mapElement) {
+		mapElement.innerHTML = '';
 	}
 
-	new maplibre.Map({
+	const maplibreMap = new maplibre.Map({
 		container: 'map',
 		zoom: mapData.map.get_population() > 20000 ? 10.5 : 11,
 		center: originCoords,
@@ -171,5 +171,5 @@ export function generateMapView(seed: number, dataset: string) {
 		preserveDrawingBuffer: true
 	});
 
-	return mapData;
+	return [mapData, maplibreMap];
 }
