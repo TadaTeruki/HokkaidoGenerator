@@ -74,8 +74,9 @@
 			>
 			{copiedSeed === seed ? 'コピーしました' : ''}<br />
 			<br />
-			<img src={screenshot} alt="地図のスクリーンショット" />
-			{#if !screenshot}
+			{#if screenshot}
+				<img src={screenshot} alt="地図のスクリーンショット" />
+			{:else}
 				(未撮影)
 			{/if}
 			<br />

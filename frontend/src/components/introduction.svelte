@@ -9,7 +9,7 @@
 	<a href="https://maplibre.org">Maplibre GL JS</a>
 </div>
 
-<div class="description">左側に地図が表示されます。</div>
+<div class="description">片側に地図が表示されます。</div>
 <div class="description">生成には数秒かかることがあります。</div>
 
 <style>
