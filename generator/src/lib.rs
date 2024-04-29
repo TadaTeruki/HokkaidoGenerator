@@ -21,7 +21,7 @@ mod tests {
         let standard = &StandardMap::new(
             seed,
             x_expand_prop,
-            include_str!("../../dogen-frontend/static/dataset/placenames.csv").into(),
+            include_str!("../../frontend/static/dataset/placenames.csv").into(),
         )
         .unwrap();
         let image_width = (1000.0 * x_expand_prop) as u32;
