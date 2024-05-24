@@ -197,10 +197,10 @@ where
 
         let slope_sample_distance = 1e-6;
         let site_to = site.extend(angle, slope_sample_distance);
-        let slope = (elevation - self.terrain.get_elevation(&into_fastlem_site(site_to))?) / slope_sample_distance;
+        let slope = (elevation - self.terrain.get_elevation(&into_fastlem_site(site_to))?)
+            / slope_sample_distance;
 
-
-        (self.rules_fn)(elevation, population_density, *site, angle, slope,  stage)
+        (self.rules_fn)(elevation, population_density, *site, angle, slope, stage)
     }
 }
 

@@ -41,7 +41,7 @@ impl StandardMap {
         let map = MapGenerator::new(
             terrain_config.clone(),
             map_config.clone(),
-            |elevation, population_density, site, angle, slope,stage| {
+            |elevation, population_density, site, angle, slope, stage| {
                 Self::rules_fn(
                     elevation,
                     population_density,
@@ -91,7 +91,7 @@ impl StandardMap {
             seed,
             particle_num: 50000,
             fault_scale: 0.1,
-            erodibility_distribution_power: 4.0,
+            erodibility_distribution_power: 5.2,
             land_ratio,
             convex_hull_is_always_outlet: false,
             global_max_slope: None,
