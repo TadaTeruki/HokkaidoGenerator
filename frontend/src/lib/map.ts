@@ -43,7 +43,7 @@ export class MapData {
 
 	createImage(colormap: Colormap, fadeRadius: number) {
 		const imageData = new ImageData(this.imageWidth, this.imageHeight);
-		const globalAlpha = 0.4;
+		const globalAlpha = 1.0;
 		for (let iy = 0; iy < this.imageHeight; iy++) {
 			for (let ix = 0; ix < this.imageWidth; ix++) {
 				const elevation = this.elevationBuffer.get_elevation(ix, iy);

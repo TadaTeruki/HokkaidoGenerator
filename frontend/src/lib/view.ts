@@ -42,8 +42,8 @@ export function generateMapView(seed: number, dataset: string) {
 			geometry: {
 				type: 'LineString',
 				coordinates: [
-					[mapXtoProportion(node1.site().x), mapYtoProportion(node1.site().y)],
-					[mapXtoProportion(node2.site().x), mapYtoProportion(node2.site().y)]
+					[mapXtoProportion(node1.site().x)*1.4, mapYtoProportion(node1.site().y)*1.4],
+					[mapXtoProportion(node2.site().x)*1.4, mapYtoProportion(node2.site().y)*1.4]
 				]
 			}
 		} as GeoJSON.Feature;
@@ -55,34 +55,29 @@ export function generateMapView(seed: number, dataset: string) {
 		}
 	});
 
-	const imageCoords = [
-		[0.0, 1.0],
-		[1.0, 1.0],
-		[1.0, 0.0],
-		[0.0, 0.0]
-	] as [[number, number], [number, number], [number, number], [number, number]];
+	const imageBounds = [
+		0,0,1,1
+	] as [number, number, number, number];
 
 	const mapStyle: StyleSpecification = {
 		version: 8,
 		sources: {
 			visual: {
-				type: 'image',
-				url: visual.toDataURL('image/png'),
-				coordinates: imageCoords
+				type: 'raster',
+				tiles: [visual.toDataURL('image/png')],
+				tileSize: 256,
+				maxzoom: 8,
+				minzoom: 8,
+				bounds: imageBounds
 			},
-			/*
-    heightmap: {
-        type: 'raster-dem',
-        url: heightmap.toDataURL('image/png'),
-        bounds: [
-            imageCoords[0][0],
-            imageCoords[0][1],
-            imageCoords[2][0],
-            imageCoords[2][1]
-        ],
-        tileSize: 2560
-    },
-    */
+			heightmap: {
+				type: 'raster-dem',
+				tiles: [heightmap.toDataURL('image/png')],
+				tileSize: 256,
+				maxzoom: 8,
+				minzoom: 8,
+				bounds: imageBounds
+			},
 			highwayPath: {
 				type: 'geojson',
 				data: {
@@ -98,32 +93,30 @@ export function generateMapView(seed: number, dataset: string) {
 				}
 			}
 		},
-		/*
+		
         terrain: {
             source: 'heightmap',
-            exaggeration: 50
+            exaggeration: 0.0025
         },
-        */
-
+		
 		layers: [
 			{
 				id: 'canvas-layer',
 				type: 'raster',
-				source: 'visual'
+				source: 'visual',
 			},
-			/*
+			
             {
                 id: 'shadow',
                 type: 'hillshade',
                 source: 'heightmap',
                 paint: {
-                    'hillshade-exaggeration': 0.03,
+                    'hillshade-exaggeration': 0.01,
                     'hillshade-shadow-color': '#000',
                     'hillshade-highlight-color': '#fff'
                 }
             },
-            */
-
+			
 			{
 				id: 'street',
 				type: 'line',
@@ -140,7 +133,7 @@ export function generateMapView(seed: number, dataset: string) {
 				source: 'highwayPath',
 				paint: {
 					'line-color': '#224',
-					'line-width': 1.5
+					'line-width': 1.0
 				}
 			}
 		]
