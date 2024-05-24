@@ -41,12 +41,13 @@ impl StandardMap {
         let map = MapGenerator::new(
             terrain_config.clone(),
             map_config.clone(),
-            |elevation, population_density, site, angle, stage| {
+            |elevation, population_density, site, angle, slope,stage| {
                 Self::rules_fn(
                     elevation,
                     population_density,
                     site,
                     angle,
+                    slope,
                     stage,
                     map_config.sea_level,
                 )
@@ -225,6 +226,7 @@ impl StandardMap {
         population_density: f64,
         _: Site,
         _: Angle,
+        slope: f64,
         stage: Stage,
         sea_level: f64,
     ) -> Option<TransportRules> {
@@ -238,7 +240,7 @@ impl StandardMap {
             population_density.max(0.001)
         };
 
-        let path_priority = (1e-9 + population_density) * (-elevation);
+        let path_priority = (1e-9 + population_density) * (-slope);
         let seaside_prop = 1.0 - (elevation / 12.0).min(1.0).max(0.0);
 
         if stage.as_num() > 0 {

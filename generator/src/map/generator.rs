@@ -36,6 +36,7 @@ where
         f64,   // population_density
         Site,  // site
         Angle, // angle
+        f64,   // slope
         Stage, // stage
     ) -> Option<TransportRules>,
 {
@@ -49,7 +50,7 @@ where
 
 impl<TF> MapGenerator<TF>
 where
-    TF: Fn(f64, f64, Site, Angle, Stage) -> Option<TransportRules>,
+    TF: Fn(f64, f64, Site, Angle, f64, Stage) -> Option<TransportRules>,
 {
     pub fn new(
         terrain_config: TerrainConfig,
@@ -171,7 +172,7 @@ where
 
 impl<TF> TransportRulesProvider for MapGenerator<TF>
 where
-    TF: Fn(f64, f64, Site, Angle, Stage) -> Option<TransportRules>,
+    TF: Fn(f64, f64, Site, Angle, f64, Stage) -> Option<TransportRules>,
 {
     fn get_rules(&self, site: &Site, angle: Angle, stage: Stage) -> Option<TransportRules> {
         let elevation = self.terrain.get_elevation(&into_fastlem_site(*site))?;
@@ -188,8 +189,18 @@ where
         if elevation < self.map_config.sea_level {
             return None;
         }
+        /*
+        let slope = self
+            .terrain
+            .get_slope(&into_fastlem_site(*site), angle.to_radians())?;
+        */
 
-        (self.rules_fn)(elevation, population_density, *site, angle, stage)
+        let slope_sample_distance = 1e-6;
+        let site_to = site.extend(angle, slope_sample_distance);
+        let slope = (elevation - self.terrain.get_elevation(&into_fastlem_site(site_to))?) / slope_sample_distance;
+
+
+        (self.rules_fn)(elevation, population_density, *site, angle, slope,  stage)
     }
 }
 
