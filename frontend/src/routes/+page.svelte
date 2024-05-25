@@ -1,13 +1,12 @@
 <script lang="ts">
-	import type { MapData } from '$lib/map';
-	import { generateMapView, getDataset, initWasm } from '$lib/view';
+	import { MapFactors, getDataset, initWasm, setupMapView } from '$lib/view';
 	import { toKana } from 'wanakana';
 	import { onMount } from 'svelte';
 	import Cityinfo from '../components/cityinfo.svelte';
 	import Introduction from '../components/introduction.svelte';
 	import maplibre from 'maplibre-gl';
 
-	let mapData: MapData | null = null;
+	let mapFactors: MapFactors;
 	let maplibreMap: maplibre.Map | null = null;
 
 	let cityName: [string, string] = ['', ''];
@@ -20,6 +19,8 @@
 	let seed: number | undefined = undefined;
 	let isInitial = false;
 	let presentationMode = false;
+
+	let view3D = false;
 
 	// onload
 	onMount(async () => {
@@ -44,7 +45,7 @@
 			if (seed === undefined) {
 				return;
 			}
-			[mapData, maplibreMap] = generateMapView(seed, dataset) as [MapData, maplibre.Map];
+			mapFactors = new MapFactors(seed, dataset);
 			isLoading = false;
 			isInitial = false;
 			history.replaceState(
@@ -53,31 +54,28 @@
 				`/?seed=${seed}${presentationMode ? '&presentation=true' : ''}`
 			);
 
-			setMap(mapData);
+			const mapData = mapFactors.mapData;
+			cityName = [
+				mapData.map.get_nameset().city_name().name(),
+				toKana(mapData.map.get_nameset().city_name().reading())
+			];
+
+			const gov = mapData.map.get_nameset().government().name();
+			let county = '';
+			if (gov !== '市') {
+				county = mapData.map.get_nameset().county_name().name() + '郡 ';
+			}
+
+			address =
+				mapData.map.get_nameset().subprefecture_name().name() +
+				mapData.map.get_nameset().subprefecture_postfix().name() +
+				' ' +
+				county +
+				cityName[0] +
+				mapData.map.get_nameset().government().name();
+
+			population = '市街人口: ' + mapData.map.get_population().toLocaleString() + '人';
 		}, 150);
-	}
-
-	function setMap(mapData: MapData) {
-		cityName = [
-			mapData.map.get_nameset().city_name().name(),
-			toKana(mapData.map.get_nameset().city_name().reading())
-		];
-
-		const gov = mapData.map.get_nameset().government().name();
-		let county = '';
-		if (gov !== '市') {
-			county = mapData.map.get_nameset().county_name().name() + '郡 ';
-		}
-
-		address =
-			mapData.map.get_nameset().subprefecture_name().name() +
-			mapData.map.get_nameset().subprefecture_postfix().name() +
-			' ' +
-			county +
-			cityName[0] +
-			mapData.map.get_nameset().government().name();
-
-		population = '市街人口: ' + mapData.map.get_population().toLocaleString() + '人';
 	}
 
 	async function newMap() {
@@ -90,6 +88,12 @@
 		history.replaceState(null, '', '/');
 		location.reload();
 	}
+
+	$: {
+		if (mapFactors) {
+			maplibreMap = setupMapView(mapFactors, view3D);
+		}
+	}
 </script>
 
 <div id="map" />
@@ -97,7 +101,8 @@
 <div id="right">
 	<header id="header">
 		<a href="/" on:click={resetPage}> Hokkaido Generator 北海道ジェネレータ </a> |
-		<a href="https://github.com/TadaTeruki/HokkaidoGenerator">GitHub</a>
+		<a href="https://github.com/TadaTeruki/HokkaidoGenerator">GitHub</a> |
+		<a href="https://hello.peruki.dev">About me</a>
 	</header>
 	<div id="control">
 		{#if isInitial}
@@ -105,6 +110,10 @@
 		{:else}
 			<Cityinfo {cityName} {address} {population} {seed} {maplibreMap} />
 		{/if}
+		<div id="checkbox">
+			<input type="checkbox" id="presentation" bind:checked={view3D} />
+			3D表示
+		</div>
 
 		<button on:click={newMap} id="generateButton" disabled={isLoading}>
 			{#if isLoading}
@@ -211,6 +220,10 @@
 	#generateButton {
 		margin-top: 1rem;
 		font-weight: bold;
+	}
+
+	#checkbox {
+		color: #888;
 	}
 
 	@keyframes generating {
