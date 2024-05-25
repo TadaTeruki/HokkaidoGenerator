@@ -41,17 +41,17 @@ export class MapData {
 		this.imageHeight = imageHeight;
 	}
 
-	createImage(colormap: Colormap, fadeRadius: number) {
+	createImage(colormap: Colormap, fadeRadius: number, globalAlpha: number) {
 		const imageData = new ImageData(this.imageWidth, this.imageHeight);
-		const globalAlpha = 1.0;
+
 		for (let iy = 0; iy < this.imageHeight; iy++) {
 			for (let ix = 0; ix < this.imageWidth; ix++) {
 				const elevation = this.elevationBuffer.get_elevation(ix, iy);
 				const color = colormap.getColor(elevation);
 				const index = (iy * this.imageWidth + ix) * 4;
-				imageData.data[index] = color[0];
-				imageData.data[index + 1] = color[1];
-				imageData.data[index + 2] = color[2];
+				imageData.data[index] = color[0] * globalAlpha + 255 * (1 - globalAlpha);
+				imageData.data[index + 1] = color[1] * globalAlpha + 255 * (1 - globalAlpha);
+				imageData.data[index + 2] = color[2] * globalAlpha + 255 * (1 - globalAlpha);
 
 				const alphaSeed = Math.min(
 					Math.min(Math.min(ix, this.imageWidth - ix), Math.min(iy, this.imageHeight - iy)) /
@@ -59,7 +59,7 @@ export class MapData {
 					1.0
 				);
 
-				imageData.data[index + 3] = 255 * Math.pow(alphaSeed, 0.8) * globalAlpha;
+				imageData.data[index + 3] = 255 * Math.pow(alphaSeed, 0.8);
 			}
 		}
 
@@ -79,7 +79,7 @@ export class MapData {
 			[0.0, 0.1, 0.15, 40.0, 80.0]
 		);
 
-		const imageData = this.createImage(colormap, 8);
+		const imageData = this.createImage(colormap, 8, 0.65);
 		ctx.putImageData(imageData, 0, 0);
 	}
 
@@ -93,7 +93,7 @@ export class MapData {
 			[0.0, 100.0]
 		);
 
-		const imageData = this.createImage(colormap, 0);
+		const imageData = this.createImage(colormap, 0, 1);
 		ctx.putImageData(imageData, 0, 0);
 	}
 }

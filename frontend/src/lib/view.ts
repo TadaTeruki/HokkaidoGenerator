@@ -33,6 +33,8 @@ export function generateMapView(seed: number, dataset: string) {
 	const bound_y = mapData.map.bound_max().y - mapData.map.bound_min().y;
 	const mapYtoProportion = (y: number) => (-y + 0.5 - mapData.map.bound_min().y) / bound_y;
 
+	const scale = 1.4;
+
 	mapData.map.network_paths().map((path) => {
 		const node1 = path.node1();
 		const node2 = path.node2();
@@ -42,8 +44,8 @@ export function generateMapView(seed: number, dataset: string) {
 			geometry: {
 				type: 'LineString',
 				coordinates: [
-					[mapXtoProportion(node1.site().x)*1.4, mapYtoProportion(node1.site().y)*1.4],
-					[mapXtoProportion(node2.site().x)*1.4, mapYtoProportion(node2.site().y)*1.4]
+					[mapXtoProportion(node1.site().x) * scale, mapYtoProportion(node1.site().y) * scale],
+					[mapXtoProportion(node2.site().x) * scale, mapYtoProportion(node2.site().y) * scale]
 				]
 			}
 		} as GeoJSON.Feature;
@@ -55,12 +57,11 @@ export function generateMapView(seed: number, dataset: string) {
 		}
 	});
 
-	const imageBounds = [
-		0,0,1,1
-	] as [number, number, number, number];
+	const imageBounds = [0, 0, 1, 1] as [number, number, number, number];
 
 	const mapStyle: StyleSpecification = {
 		version: 8,
+		glyphs: 'https://fonts.openmaptiles.org/{fontstack}/{range}.pbf',
 		sources: {
 			visual: {
 				type: 'raster',
@@ -93,38 +94,24 @@ export function generateMapView(seed: number, dataset: string) {
 				}
 			}
 		},
-		
-        terrain: {
-            source: 'heightmap',
-            exaggeration: 0.0025
-        },
-		
+		terrain: {
+			source: 'heightmap',
+			exaggeration: 0.004
+		},
+
 		layers: [
 			{
 				id: 'canvas-layer',
 				type: 'raster',
-				source: 'visual',
+				source: 'visual'
 			},
-			
-            {
-                id: 'shadow',
-                type: 'hillshade',
-                source: 'heightmap',
-                paint: {
-                    'hillshade-exaggeration': 0.01,
-                    'hillshade-shadow-color': '#000',
-                    'hillshade-highlight-color': '#fff'
-                }
-            },
-			
 			{
 				id: 'street',
 				type: 'line',
 				source: 'streetPath',
 				paint: {
-					'line-color': '#333',
-					'line-opacity': 0.45,
-					'line-width': 1.0
+					'line-color': '#666',
+					'line-width': 0.5
 				}
 			},
 			{
@@ -132,18 +119,18 @@ export function generateMapView(seed: number, dataset: string) {
 				type: 'line',
 				source: 'highwayPath',
 				paint: {
-					'line-color': '#224',
-					'line-width': 1.0
+					'line-color': '#333',
+					'line-width': 1.5
 				}
 			}
 		]
 	};
 
 	const originSite = mapData.map.get_origin_site();
-	const originCoords = [mapXtoProportion(originSite.x), mapYtoProportion(originSite.y)] as [
-		number,
-		number
-	];
+	const originCoords = [
+		mapXtoProportion(originSite.x) * scale,
+		mapYtoProportion(originSite.y) * scale
+	] as [number, number];
 
 	const mapElement = document.getElementById('map');
 	if (mapElement) {

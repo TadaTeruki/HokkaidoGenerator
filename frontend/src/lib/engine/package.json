@@ -1,14 +1,14 @@
 {
-  "name": "hokkaido-generator",
-  "version": "0.1.0",
-  "files": [
-    "hokkaido_generator_bg.wasm",
-    "hokkaido_generator.js",
-    "hokkaido_generator.d.ts"
-  ],
-  "module": "hokkaido_generator.js",
-  "types": "hokkaido_generator.d.ts",
-  "sideEffects": [
-    "./snippets/*"
-  ]
+	"name": "hokkaido-generator",
+	"version": "0.1.0",
+	"files": [
+		"hokkaido_generator_bg.wasm",
+		"hokkaido_generator.js",
+		"hokkaido_generator.d.ts"
+	],
+	"module": "hokkaido_generator.js",
+	"types": "hokkaido_generator.d.ts",
+	"sideEffects": [
+		"./snippets/*"
+	]
 }
