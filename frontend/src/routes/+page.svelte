@@ -1,13 +1,12 @@
 <script lang="ts">
-	import { MapFactors, getDataset, initWasm, setupMapView } from '$lib/view';
+	import { MapFactors, MapView, getDataset, initWasm } from '$lib/view';
 	import { toKana } from 'wanakana';
 	import { onMount } from 'svelte';
 	import Cityinfo from '../components/cityinfo.svelte';
 	import Introduction from '../components/introduction.svelte';
-	import maplibre from 'maplibre-gl';
 
 	let mapFactors: MapFactors;
-	let maplibreMap: maplibre.Map | null = null;
+	let mapView: MapView;
 
 	let cityName: [string, string] = ['', ''];
 	let address: string = '';
@@ -75,6 +74,8 @@
 				mapData.map.get_nameset().government().name();
 
 			population = '市街人口: ' + mapData.map.get_population().toLocaleString() + '人';
+
+			mapView = new MapView(mapFactors, view3D);
 		}, 150);
 	}
 
@@ -89,10 +90,12 @@
 		location.reload();
 	}
 
-	$: {
-		if (mapFactors) {
-			maplibreMap = setupMapView(mapFactors, view3D);
-		}
+	$: if (mapView) {
+		mapView.updateStyle(view3D);
+	}
+
+	$: if (mapView) {
+		mapView.updateFactors(mapFactors);
 	}
 </script>
 
@@ -108,7 +111,7 @@
 		{#if isInitial}
 			<Introduction />
 		{:else}
-			<Cityinfo {cityName} {address} {population} {seed} {maplibreMap} />
+			<Cityinfo {cityName} {address} {population} {seed} {mapView} />
 		{/if}
 		<div id="checkbox">
 			<input type="checkbox" id="presentation" bind:checked={view3D} />

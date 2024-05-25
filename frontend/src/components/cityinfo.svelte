@@ -1,11 +1,12 @@
 <script lang="ts">
+	import type { MapView } from '$lib/view';
 	import { onMount } from 'svelte';
 
 	export let cityName = ['', ''];
 	export let address = '';
 	export let population = '';
 	export let seed = 0;
-	export let maplibreMap: maplibregl.Map | null = null;
+	export let mapView: MapView | undefined = undefined;
 
 	let origin = '';
 	let copiedSeed = -1;
@@ -22,7 +23,7 @@
 	}
 
 	function mapScreenShot() {
-		const canvas = maplibreMap?.getCanvas() as HTMLCanvasElement;
+		const canvas = mapView?.maplibreMap?.getCanvas() as HTMLCanvasElement;
 		const croppedCanvas = document.createElement('canvas');
 
 		const croppedWH = canvas.width > canvas.height ? canvas.height : canvas.width;

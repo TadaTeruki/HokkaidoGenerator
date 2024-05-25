@@ -83,30 +83,47 @@ export class MapFactors {
 	}
 }
 
-export function setupMapView(factors: MapFactors, view3D: boolean) {
-	const mapStyle = setupMapStyle(view3D, factors);
+export class MapView {
+	maplibreMap: maplibre.Map | undefined;
+	factors: MapFactors;
+	view3D: boolean;
 
-	const mapElement = document.getElementById('map');
-	if (mapElement) {
-		mapElement.innerHTML = '';
+	constructor(factors: MapFactors, view3D: boolean) {
+		this.factors = factors;
+		this.view3D = view3D;
+		this.updateFactors(factors);
 	}
 
-	const maplibreMap = new maplibre.Map({
-		container: 'map',
-		zoom: factors.mapData.map.get_population() > 20000 ? 10.5 : 11,
-		center: factors.originCoords,
-		style: mapStyle,
-		attributionControl: false,
-		renderWorldCopies: false,
-		pitch: 40,
-		maxPitch: 85,
-		bearing:
-			(factors.mapData.map.get_initial_angle() / Math.PI) * 180 + 45 * (factors.seed % 2 ? 1 : -1),
-		antialias: false,
-		preserveDrawingBuffer: true
-	});
+	updateStyle(view3D: boolean) {
+		const mapStyle = setupMapStyle(view3D, this.factors);
+		this.maplibreMap?.setStyle(mapStyle);
+		this.view3D = view3D;
+	}
 
-	return maplibreMap;
+	updateFactors(factors: MapFactors) {
+		this.factors = factors;
+		const mapStyle = setupMapStyle(this.view3D, factors);
+
+		const mapElement = document.getElementById('map');
+		if (mapElement) {
+			mapElement.innerHTML = '';
+		}
+		this.maplibreMap = new maplibre.Map({
+			container: 'map',
+			zoom: factors.mapData.map.get_population() > 20000 ? 10.5 : 11,
+			center: factors.originCoords,
+			style: mapStyle,
+			attributionControl: false,
+			renderWorldCopies: false,
+			pitch: 40,
+			maxPitch: 85,
+			bearing:
+				(factors.mapData.map.get_initial_angle() / Math.PI) * 180 +
+				45 * (factors.seed % 2 ? 1 : -1),
+			antialias: false,
+			preserveDrawingBuffer: true
+		});
+	}
 }
 
 function setupMapStyle(view3D: boolean, factors: MapFactors): StyleSpecification {
@@ -178,7 +195,7 @@ function setupMapStyle(view3D: boolean, factors: MapFactors): StyleSpecification
 	if (view3D) {
 		mapStyle.terrain = {
 			source: 'heightmap',
-			exaggeration: 0.004
+			exaggeration: 0.003
 		};
 	}
 
