@@ -189,18 +189,21 @@ where
         if elevation < self.map_config.sea_level {
             return None;
         }
-        /*
-        let slope = self
-            .terrain
-            .get_slope(&into_fastlem_site(*site), angle.to_radians())?;
-        */
 
-        let slope_sample_distance = 1e-6;
+        let slope_sample_distance = 1e-5;
         let site_to = site.extend(angle, slope_sample_distance);
         let slope = (elevation - self.terrain.get_elevation(&into_fastlem_site(site_to))?)
             / slope_sample_distance;
+        let slope_rad = slope.atan();
 
-        (self.rules_fn)(elevation, population_density, *site, angle, slope, stage)
+        (self.rules_fn)(
+            elevation,
+            population_density,
+            *site,
+            angle,
+            slope_rad,
+            stage,
+        )
     }
 }
 

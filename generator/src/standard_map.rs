@@ -1,3 +1,5 @@
+use std::f64::consts::PI;
+
 use fastlem::models::surface::sites::Site2D;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use street_engine::{
@@ -41,15 +43,15 @@ impl StandardMap {
         let map = MapGenerator::new(
             terrain_config.clone(),
             map_config.clone(),
-            |elevation, population_density, site, angle, slope, stage| {
+            |elevation, population_density, site, angle, slope_rad, stage| {
                 Self::rules_fn(
                     elevation,
                     population_density,
                     site,
                     angle,
-                    slope,
+                    slope_rad,
                     stage,
-                    map_config.sea_level,
+                    &map_config,
                 )
             },
         )?
@@ -60,7 +62,8 @@ impl StandardMap {
 
     pub fn new(seed: u32, x_expand_prop: f64, dataset: String) -> Option<StandardMap> {
         let mut rnd = StdRng::seed_from_u64(seed as u64);
-        let land_ratio = rnd.gen_range(0.5..1.0);
+        let land_ratio = rnd.gen_range(0.5..0.9);
+        let erodibility_distribution_power = rnd.gen_range(3.0..5.0);
         let city_size_prop_min = 0.01;
         let city_size_prop_max = 0.12;
         let city_size_prop = (city_size_prop_min
@@ -75,7 +78,7 @@ impl StandardMap {
         })?);
 
         let map_config = MapConfig {
-            sea_level: 1e-1,
+            sea_level: 1e-3,
             max_slope_livable: std::f64::consts::PI / 4.0,
             origin_sample_num: 10,
             max_retries: 500,
@@ -90,8 +93,8 @@ impl StandardMap {
             y_bound: bound,
             seed,
             particle_num: 50000,
-            fault_scale: 0.1,
-            erodibility_distribution_power: 5.2,
+            fault_scale: 0.15,
+            erodibility_distribution_power,
             land_ratio,
             convex_hull_is_always_outlet: false,
             global_max_slope: None,
@@ -226,11 +229,11 @@ impl StandardMap {
         population_density: f64,
         _: Site,
         _: Angle,
-        slope: f64,
+        slope_rad: f64,
         stage: Stage,
-        sea_level: f64,
+        map_config: &MapConfig,
     ) -> Option<TransportRules> {
-        if elevation < sea_level {
+        if elevation < map_config.sea_level {
             return None;
         }
 
@@ -240,8 +243,8 @@ impl StandardMap {
             population_density.max(0.001)
         };
 
-        let path_priority = (1e-9 + population_density) * (-slope);
-        let seaside_prop = 1.0 - (elevation / 12.0).min(1.0).max(0.0);
+        let slope_prop = slope_rad.abs() / (PI * 0.5);
+        let path_priority = (1e-9 + population_density) * (-elevation - slope_prop);
 
         if stage.as_num() > 0 {
             Some(TransportRules {
@@ -251,12 +254,16 @@ impl StandardMap {
                 path_normal_length: 0.5,
                 path_extra_length_for_intersection: 0.3,
                 branch_rules: BranchRules {
-                    branch_density: 0.01 + population_density * 0.99,
+                    branch_density: 0.01
+                        + (0.8 - slope_prop).max(0.0) * 0.005
+                        + population_density * 0.985,
                     staging_probability: 0.0,
                 },
                 path_direction_rules: PathDirectionRules {
                     max_radian: std::f64::consts::PI
-                        / (1.0 + 1450.0 * seaside_prop.powf(1.75) + 1000.0 * population_density),
+                        / (1.0
+                            + 2500.0 * (0.6 - slope_prop).max(0.0)
+                            + 5000.0 * population_density),
                     comparison_step: 7,
                 },
             })
@@ -268,12 +275,11 @@ impl StandardMap {
                 path_normal_length: 0.5,
                 path_extra_length_for_intersection: 0.3,
                 branch_rules: BranchRules {
-                    branch_density: 0.05 + population_density * 0.95,
-                    staging_probability: 0.99 - population_density * 0.2,
+                    branch_density: 0.05 + population_density * 0.55,
+                    staging_probability: 0.99 - (0.4 - slope_prop).max(0.0) * 0.1,
                 },
                 path_direction_rules: PathDirectionRules {
-                    max_radian: std::f64::consts::PI
-                        / (50.0 + 100.0 * seaside_prop + 10000.0 * population_density),
+                    max_radian: std::f64::consts::PI / (40.0 + 800.0 * (0.4 - slope_prop).max(0.0)),
                     comparison_step: 5,
                 },
             })

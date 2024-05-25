@@ -135,7 +135,6 @@ mod tests {
 
         standard.network_paths().iter().for_each(|path| {
             let (inode, jnode) = (path.node1(), path.node2());
-            paint.set_color_rgba8(100, 100, 100, 255);
 
             let width = if path.stage() == 0 { 1.5 } else { 0.5 };
 
@@ -144,7 +143,7 @@ mod tests {
                 ..Default::default()
             };
 
-            let path = {
+            let dpath = {
                 let mut path = PathBuilder::new();
                 path.move_to(
                     image_x_of(inode.site().x) as f32,
@@ -156,9 +155,8 @@ mod tests {
                 );
                 path.finish().unwrap()
             };
-
-            paint.set_color_rgba8(0, 0, 0, 80);
-            pixmap.stroke_path(&path, &paint, &stroke, Transform::identity(), None);
+            paint.set_color_rgba8(0, 0, 0, 255);
+            pixmap.stroke_path(&dpath, &paint, &stroke, Transform::identity(), None);
         });
 
         paint.set_color_rgba8(255, 0, 0, 255);
