@@ -279,7 +279,7 @@ impl StandardMap {
                     staging_probability: 0.99 - (0.4 - slope_prop).max(0.0) * 0.1,
                 },
                 path_direction_rules: PathDirectionRules {
-                    max_radian: std::f64::consts::PI / (40.0 + 800.0 * (0.4 - slope_prop).max(0.0)),
+                    max_radian: std::f64::consts::PI / (40.0 + 8000.0 * (0.4 - slope_prop).max(0.0)),
                     comparison_step: 5,
                 },
             })
