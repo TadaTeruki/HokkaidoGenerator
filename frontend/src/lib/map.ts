@@ -41,7 +41,7 @@ export class MapData {
 		this.imageHeight = imageHeight;
 	}
 
-	createImage(colormap: Colormap, fadeRadius: number, globalAlpha: number) {
+	createImage(colormap: Colormap, fadeRadius: number, globalAlpha: number, background: number[]) {
 		const imageData = new ImageData(this.imageWidth, this.imageHeight);
 
 		for (let iy = 0; iy < this.imageHeight; iy++) {
@@ -49,9 +49,9 @@ export class MapData {
 				const elevation = this.elevationBuffer.get_elevation(ix, iy);
 				const color = colormap.getColor(elevation);
 				const index = (iy * this.imageWidth + ix) * 4;
-				imageData.data[index] = color[0] * globalAlpha + 255 * (1 - globalAlpha);
-				imageData.data[index + 1] = color[1] * globalAlpha + 255 * (1 - globalAlpha);
-				imageData.data[index + 2] = color[2] * globalAlpha + 255 * (1 - globalAlpha);
+				imageData.data[index] = color[0] * globalAlpha + background[0] * (1 - globalAlpha);
+				imageData.data[index + 1] = color[1] * globalAlpha + background[1] * (1 - globalAlpha);
+				imageData.data[index + 2] = color[2] * globalAlpha + background[2] * (1 - globalAlpha);
 
 				const alphaSeed = Math.min(
 					Math.min(Math.min(ix, this.imageWidth - ix), Math.min(iy, this.imageHeight - iy)) /
@@ -66,10 +66,16 @@ export class MapData {
 		return imageData;
 	}
 
-	drawVisual(canvas: HTMLCanvasElement) {
+	drawVisual(canvas: HTMLCanvasElement, nightMode: boolean) {
 		const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
 		const colormap = new Colormap(
-			[
+			nightMode ? [
+				[77, 82, 114],
+				[210, 210, 210],
+				[215, 230, 170],
+				[25, 100, 25],
+				[15, 60, 15]
+			]: [
 				[170, 200, 220],
 				[240, 240, 210],
 				[215, 230, 170],
@@ -79,7 +85,12 @@ export class MapData {
 			[0.0, 0.1, 0.15, 40.0, 80.0]
 		);
 
-		const imageData = this.createImage(colormap, 8, 0.65);
+		const imageData = this.createImage(
+			colormap,
+			8,
+			nightMode ? 0.3 : 0.65,
+			nightMode ? [0, 0, 0] : [255, 255, 255]
+		);
 		ctx.putImageData(imageData, 0, 0);
 	}
 
@@ -93,7 +104,7 @@ export class MapData {
 			[0.0, 100.0]
 		);
 
-		const imageData = this.createImage(colormap, 0, 1);
+		const imageData = this.createImage(colormap, 0, 1, [255, 255, 255]);
 		ctx.putImageData(imageData, 0, 0);
 	}
 }

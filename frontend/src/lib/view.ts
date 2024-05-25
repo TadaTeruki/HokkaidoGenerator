@@ -19,7 +19,7 @@ export class MapFactors {
 	originCoords: [number, number];
 	seed: number;
 
-	constructor(seed: number, dataset: string) {
+	constructor(seed: number, dataset: string, nightMode: boolean) {
 		this.seed = seed;
 		const width = 700;
 		const height = 700;
@@ -28,7 +28,7 @@ export class MapFactors {
 		this.visual = document.createElement('canvas');
 		this.visual.width = width;
 		this.visual.height = height;
-		this.mapData.drawVisual(this.visual);
+		this.mapData.drawVisual(this.visual, nightMode);
 
 		this.heightmap = document.createElement('canvas');
 		this.heightmap.width = width;
@@ -81,6 +81,10 @@ export class MapFactors {
 	heightmapURL() {
 		return this.heightmap.toDataURL();
 	}
+
+	updateNightMode(nightMode: boolean) {
+		this.mapData.drawVisual(this.visual, nightMode);
+	}
 }
 
 export class MapView {
@@ -88,21 +92,21 @@ export class MapView {
 	factors: MapFactors;
 	view3D: boolean;
 
-	constructor(factors: MapFactors, view3D: boolean) {
+	constructor(factors: MapFactors, view3D: boolean, nightMode: boolean) {
 		this.factors = factors;
 		this.view3D = view3D;
-		this.updateFactors(factors);
+		this.updateFactors(factors, nightMode);
 	}
 
-	updateStyle(view3D: boolean) {
-		const mapStyle = setupMapStyle(view3D, this.factors);
+	updateStyle(view3D: boolean, nightMode: boolean) {
+		this.view3D = view3D;
+		const mapStyle = setupMapStyle(this.factors, this.view3D, nightMode);
 		this.maplibreMap?.setStyle(mapStyle);
-		this.view3D = view3D;
 	}
 
-	updateFactors(factors: MapFactors) {
+	updateFactors(factors: MapFactors, nightMode: boolean) {
 		this.factors = factors;
-		const mapStyle = setupMapStyle(this.view3D, factors);
+		const mapStyle = setupMapStyle(this.factors, this.view3D, nightMode);
 
 		const mapElement = document.getElementById('map');
 		if (mapElement) {
@@ -126,7 +130,11 @@ export class MapView {
 	}
 }
 
-function setupMapStyle(view3D: boolean, factors: MapFactors): StyleSpecification {
+function setupMapStyle(
+	factors: MapFactors,
+	view3D: boolean,
+	nightMode: boolean
+): StyleSpecification {
 	const imageBounds = [0, 0, 1, 1] as [number, number, number, number];
 
 	const mapStyle: StyleSpecification = {
@@ -175,19 +183,33 @@ function setupMapStyle(view3D: boolean, factors: MapFactors): StyleSpecification
 				id: 'street',
 				type: 'line',
 				source: 'streetPath',
-				paint: {
-					'line-color': '#666',
-					'line-width': 0.5
-				}
+				paint: nightMode
+					? {
+							'line-color': '#ddccaa',
+							'line-width': 2.0,
+							'line-dasharray': [2, 2],
+							'line-blur': 1
+						}
+					: {
+							'line-color': '#666',
+							'line-width': 0.5
+						}
 			},
 			{
 				id: 'highway',
 				type: 'line',
 				source: 'highwayPath',
-				paint: {
-					'line-color': '#333',
-					'line-width': 1.5
-				}
+				paint: nightMode
+					? {
+							'line-color': '#ffedd5',
+							'line-width': 3.0,
+							'line-dasharray': [1, 1],
+							'line-blur': 1
+						}
+					: {
+							'line-color': '#333',
+							'line-width': 1.5
+						}
 			}
 		]
 	};
@@ -195,7 +217,7 @@ function setupMapStyle(view3D: boolean, factors: MapFactors): StyleSpecification
 	if (view3D) {
 		mapStyle.terrain = {
 			source: 'heightmap',
-			exaggeration: 0.003
+			exaggeration: 0.004
 		};
 	}
 

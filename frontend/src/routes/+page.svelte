@@ -20,6 +20,7 @@
 	let presentationMode = false;
 
 	let view3D = false;
+	let nightMode = true;
 
 	// onload
 	onMount(async () => {
@@ -44,7 +45,7 @@
 			if (seed === undefined) {
 				return;
 			}
-			mapFactors = new MapFactors(seed, dataset);
+			mapFactors = new MapFactors(seed, dataset, nightMode);
 			isLoading = false;
 			isInitial = false;
 			history.replaceState(
@@ -75,7 +76,7 @@
 
 			population = '市街人口: ' + mapData.map.get_population().toLocaleString() + '人';
 
-			mapView = new MapView(mapFactors, view3D);
+			mapView = new MapView(mapFactors, view3D, nightMode);
 		}, 150);
 	}
 
@@ -91,16 +92,20 @@
 	}
 
 	$: if (mapView) {
-		mapView.updateStyle(view3D);
+		mapView.updateStyle(view3D, nightMode);
 	}
 
 	$: if (mapView) {
-		mapView.updateFactors(mapFactors);
+		mapView.updateFactors(mapFactors, nightMode);
+	}
+
+	$: if (mapFactors && mapView) {
+		mapFactors.updateNightMode(nightMode);
+		mapView.updateFactors(mapFactors, nightMode);
 	}
 </script>
 
-<div id="map" />
-
+<div id="map" class:map-daytime={!nightMode} class:map-night={nightMode} />
 <div id="right">
 	<header id="header">
 		<a href="/" on:click={resetPage}> Hokkaido Generator 北海道ジェネレータ </a> |
@@ -116,6 +121,11 @@
 		<div id="checkbox">
 			<input type="checkbox" id="presentation" bind:checked={view3D} />
 			3D表示
+		</div>
+
+		<div id="checkbox">
+			<input type="checkbox" id="presentation" bind:checked={nightMode} />
+			夜景モード
 		</div>
 
 		<button on:click={newMap} id="generateButton" disabled={isLoading}>
@@ -147,9 +157,16 @@
 	#map {
 		width: 50%;
 		height: 100%;
-		background-color: #f0f0f0;
 		display: flex;
 		align-items: center;
+	}
+
+	.map-daytime {
+		background-color: #f0f0f0;
+	}
+
+	.map-night {
+		background-image: linear-gradient(180deg, #202020 0%, #252040 30%);
 	}
 
 	#right {

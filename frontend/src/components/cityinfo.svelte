@@ -30,8 +30,8 @@
 		croppedCanvas.width = croppedWH;
 		croppedCanvas.height = croppedWH;
 		const croppedCtx = croppedCanvas.getContext('2d') as CanvasRenderingContext2D;
-		croppedCtx.fillStyle = '#f0f0f0';
-		croppedCtx.fillRect(0, 0, croppedWH, croppedWH);
+		//croppedCtx.fillStyle = '#f0f0f0';
+		//croppedCtx.fillRect(0, 0, croppedWH, croppedWH);
 
 		croppedCtx.drawImage(
 			canvas,
