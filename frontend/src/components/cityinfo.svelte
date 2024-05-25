@@ -90,12 +90,12 @@
 <style>
 	.cityname {
 		font-size: 3rem;
-		color: #333;
+		color: var(--main-text);
 	}
 
 	.citypostfix {
 		font-size: 2rem;
-		color: #888;
+		color: var(--sub-text);
 	}
 
 	.citynamebox-outer {
@@ -112,28 +112,33 @@
 
 	.citykana {
 		font-size: 1.5rem;
-		color: #888;
+		color: var(--sub-text);
 	}
 
 	.address {
 		font-size: 1rem;
-		color: #888;
+		color: var(--sub-text);
 	}
 
 	.population {
 		font-size: 1rem;
-		color: #888;
+		color: var(--sub-text);
 	}
 
 	.share {
 		font-size: 0.8rem;
-		color: #888;
+		color: var(--sub-text);
+	}
+
+	summary {
+		text-decoration: underline;
 	}
 
 	.shareBox {
-		background-color: #f0f0f0;
+		background-color: var(--sub-bg);
 		padding: 1rem;
 		border-radius: 0.5rem;
+		transition: background-color 0.5s;
 	}
 
 	.shareBox img {

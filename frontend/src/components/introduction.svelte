@@ -15,23 +15,23 @@
 <style>
 	.title {
 		font-size: 3rem;
-		color: #333;
+		color: var(--main-text);
 	}
 
 	.subtitle {
 		font-size: 1rem;
-		color: #888;
+		color: var(--sub-text);
 	}
 
 	.description {
 		font-size: 1rem;
-		color: #333;
+		color: var(--sub-text);
 	}
 
 	.credit {
 		margin-top: 1rem;
 		font-size: 1rem;
-		color: #888;
+		color: var(--sub-text);
 		line-height: 1.5;
 	}
 

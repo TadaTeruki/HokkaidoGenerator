@@ -20,10 +20,18 @@
 	let presentationMode = false;
 
 	let view3D = false;
-	let nightMode = true;
+	let nightMode = false;
+	let mounted = false;
+
+	function preferedNightMode() {
+		return window.matchMedia('(prefers-color-scheme: dark)').matches;
+	}
 
 	// onload
 	onMount(async () => {
+		mounted = true;
+		nightMode = preferedNightMode();
+
 		await initWasm();
 		dataset = await getDataset();
 
@@ -91,6 +99,14 @@
 		location.reload();
 	}
 
+	$: if (mounted) {
+		if (nightMode) {
+			document.documentElement.classList.add('dark');
+		} else {
+			document.documentElement.classList.remove('dark');
+		}
+	}
+
 	$: if (mapView) {
 		mapView.updateStyle(view3D, nightMode);
 	}
@@ -110,7 +126,7 @@
 	<header id="header">
 		<a href="/" on:click={resetPage}> Hokkaido Generator 北海道ジェネレータ </a> |
 		<a href="https://github.com/TadaTeruki/HokkaidoGenerator">GitHub</a> |
-		<a href="https://hello.peruki.dev">About me</a>
+		<a href="https://peruki.dev">peruki.dev</a>
 	</header>
 	<div id="control">
 		{#if isInitial}
@@ -118,6 +134,7 @@
 		{:else}
 			<Cityinfo {cityName} {address} {population} {seed} {mapView} />
 		{/if}
+
 		<div id="checkbox">
 			<input type="checkbox" id="presentation" bind:checked={view3D} />
 			3D表示
@@ -125,7 +142,7 @@
 
 		<div id="checkbox">
 			<input type="checkbox" id="presentation" bind:checked={nightMode} />
-			夜景モード
+			ダークモード (夜景)
 		</div>
 
 		<button on:click={newMap} id="generateButton" disabled={isLoading}>
@@ -144,6 +161,28 @@
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500&display=swap');
 
+	:global(:root) {
+		--page-bg: #fafafa;
+		--sub-bg: #f0f0f0;
+		--button-bg: #333;
+		--button-bg-hover: #888;
+		--button-text: #f0f0f0;
+		--main-text: #333;
+		--sub-text: #888;
+		--sub-text-hover: #aaa;
+	}
+
+	:root.dark {
+		--page-bg: #202020;
+		--sub-bg: #303030;
+		--button-bg: #555;
+		--button-bg-hover: #777;
+		--button-text: #f0f0f0;
+		--main-text: #f0f0f0;
+		--sub-text: #aaa;
+		--sub-text-hover: #aaa;
+	}
+
 	:global(body) {
 		margin: 0;
 		display: flex;
@@ -152,6 +191,8 @@
 		font-family: 'Zen Kaku Gothic New', sans-serif;
 		width: 100vw;
 		height: 100vh;
+		background-color: var(--page-bg);
+		transition: background-color 0.5s;
 	}
 
 	#map {
@@ -159,10 +200,11 @@
 		height: 100%;
 		display: flex;
 		align-items: center;
+		transition: background-color 0.5s;
 	}
 
 	.map-daytime {
-		background-color: #f0f0f0;
+		background-color: linear-gradient(180deg, #e0f0f0 0%, #f0f0f0 30%);
 	}
 
 	.map-night {
@@ -206,35 +248,31 @@
 
 	#header {
 		font-size: 1rem;
-		color: #888;
+		color: var(--sub-text);
 		text-align: center;
 		margin: 0.5rem auto;
 	}
 
 	#header:hover {
-		color: #aaa;
+		color: var(--sub-text-hover);
 	}
 
 	a {
-		color: #888;
-		border-bottom: 0.5px solid #888;
+		color: var(--sub-text);
+		border-bottom: 0.5px solid var(--sub-text);
 		text-decoration: none;
 	}
 
 	button {
 		border: none;
-		background-color: #333;
-		color: #f0f0f0;
+		background-color: var(--button-bg);
+		color: var(--button-text);
 		border-radius: 0.5rem;
 		padding: 0.5rem 1rem;
 	}
 
 	button:hover {
-		background-color: #888;
-	}
-
-	button:active {
-		animation: generating 0.4s alternate infinite;
+		background-color: var(--button-bg-hover);
 	}
 
 	#generateButton {
@@ -243,16 +281,7 @@
 	}
 
 	#checkbox {
-		color: #888;
-	}
-
-	@keyframes generating {
-		0% {
-			background-color: #555;
-		}
-		100% {
-			background-color: #888;
-		}
+		color: var(--sub-text);
 	}
 
 	#qr {

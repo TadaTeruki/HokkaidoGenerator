@@ -69,19 +69,21 @@ export class MapData {
 	drawVisual(canvas: HTMLCanvasElement, nightMode: boolean) {
 		const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
 		const colormap = new Colormap(
-			nightMode ? [
-				[77, 82, 114],
-				[210, 210, 210],
-				[215, 230, 170],
-				[25, 100, 25],
-				[15, 60, 15]
-			]: [
-				[170, 200, 220],
-				[240, 240, 210],
-				[215, 230, 170],
-				[25, 100, 25],
-				[15, 60, 15]
-			],
+			nightMode
+				? [
+						[77, 82, 114],
+						[210, 210, 210],
+						[215, 230, 170],
+						[25, 100, 25],
+						[15, 60, 15]
+					]
+				: [
+						[170, 200, 220],
+						[240, 240, 210],
+						[215, 230, 170],
+						[25, 100, 25],
+						[15, 60, 15]
+					],
 			[0.0, 0.1, 0.15, 40.0, 80.0]
 		);
 
