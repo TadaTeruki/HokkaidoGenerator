@@ -61,7 +61,7 @@ source: https://github.com/TadaTeruki/fastlem
 
 ## 地名データセットについて
 
-[CSV file](https://github.com/TadaTeruki/HokkaidoGenerator/blob/main/dogen-frontend/static/dataset/placenames.csv)
+[CSV file](./frontend/static/dataset/placenames.csv)
 
 地名の生成にあたり、
 以下のフォーマットに基づくCSV形式のデータセットを用いている。
