@@ -66,10 +66,10 @@ export class MapData {
 		return imageData;
 	}
 
-	drawVisual(canvas: HTMLCanvasElement, nightMode: boolean) {
+	drawVisual(canvas: HTMLCanvasElement, darkMode: boolean) {
 		const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
 		const colormap = new Colormap(
-			nightMode
+			darkMode
 				? [
 						[77, 82, 114],
 						[210, 210, 210],
@@ -90,8 +90,8 @@ export class MapData {
 		const imageData = this.createImage(
 			colormap,
 			8,
-			nightMode ? 0.4 : 0.65,
-			nightMode ? [0, 0, 0] : [255, 255, 255]
+			darkMode ? 0.4 : 0.65,
+			darkMode ? [0, 0, 0] : [255, 255, 255]
 		);
 		ctx.putImageData(imageData, 0, 0);
 	}

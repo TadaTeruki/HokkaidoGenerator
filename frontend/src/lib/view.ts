@@ -11,7 +11,7 @@ export class MapFactors {
 	originCoords: [number, number];
 	seed: number;
 
-	constructor(seed: number, dataset: string, nightMode: boolean) {
+	constructor(seed: number, dataset: string, darkMode: boolean) {
 		this.seed = seed;
 		const width = 700;
 		const height = 700;
@@ -20,7 +20,7 @@ export class MapFactors {
 		this.visual = document.createElement('canvas');
 		this.visual.width = width;
 		this.visual.height = height;
-		this.mapData.drawVisual(this.visual, nightMode);
+		this.mapData.drawVisual(this.visual, darkMode);
 
 		this.heightmap = document.createElement('canvas');
 		this.heightmap.width = width;
@@ -74,8 +74,8 @@ export class MapFactors {
 		return this.heightmap.toDataURL();
 	}
 
-	updateNightMode(nightMode: boolean) {
-		this.mapData.drawVisual(this.visual, nightMode);
+	updateNightMode(darkMode: boolean) {
+		this.mapData.drawVisual(this.visual, darkMode);
 	}
 }
 
@@ -83,21 +83,21 @@ export class MapView {
 	maplibreMap: maplibre.Map | undefined;
 	factors: MapFactors | undefined;
 
-	constructor(factors: MapFactors, view3D: boolean, nightMode: boolean) {
-		this.updateFactors(factors, view3D, nightMode);
+	constructor(factors: MapFactors, view3D: boolean, darkMode: boolean) {
+		this.updateFactors(factors, view3D, darkMode);
 	}
 
-	updateStyle(view3D: boolean, nightMode: boolean) {
+	updateStyle(view3D: boolean, darkMode: boolean) {
 		if (!this.factors) return;
-		const mapStyle = setupMapStyle(this.factors, view3D, nightMode);
+		const mapStyle = setupMapStyle(this.factors, view3D, darkMode);
 		this.maplibreMap?.setStyle(mapStyle);
 	}
 
-	updateFactors(factors: MapFactors, view3D: boolean, nightMode: boolean) {
+	updateFactors(factors: MapFactors, view3D: boolean, darkMode: boolean) {
 		const initial = !this.factors;
 		this.factors = factors;
 
-		const mapStyle = setupMapStyle(this.factors, view3D, nightMode);
+		const mapStyle = setupMapStyle(this.factors, view3D, darkMode);
 
 		if (initial) {
 			const mapElement = document.getElementById('map');
@@ -129,7 +129,7 @@ export class MapView {
 function setupMapStyle(
 	factors: MapFactors,
 	view3D: boolean,
-	nightMode: boolean
+	darkMode: boolean
 ): StyleSpecification {
 	const imageBounds = [0, 0, 1, 1] as [number, number, number, number];
 
@@ -179,7 +179,7 @@ function setupMapStyle(
 				id: 'street',
 				type: 'line',
 				source: 'streetPath',
-				paint: nightMode
+				paint: darkMode
 					? {
 							'line-color': '#ddccaa',
 							'line-width': 2.0,
@@ -194,7 +194,7 @@ function setupMapStyle(
 				id: 'highway',
 				type: 'line',
 				source: 'highwayPath',
-				paint: nightMode
+				paint: darkMode
 					? {
 							'line-color': '#ffedd5',
 							'line-width': 2.0,

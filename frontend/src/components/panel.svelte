@@ -3,12 +3,27 @@
 	
     import { _ } from 'svelte-i18n';
 	import init from "$lib/engine/hokkaido_generator";
-	import { initialSeedStore, mapSetStore, placenameDatasetStore } from "../routes/store";
-	import { createMap } from "$lib/map";
+	import { initialSettingsStore, mapSetStore, placenameDatasetStore } from "../routes/store";
+	import { MapSet, createMap } from "$lib/map";
 	import { onMount } from "svelte";
     
+	let seed: number | undefined = undefined;
     let view3D = false;
-    let nightMode = false;
+    let darkMode = false;
+	onMount(() => {
+		initialSettingsStore.subscribe(initialSettings => {
+			if (initialSettings.view3D !== undefined) {
+				view3D = initialSettings.view3D;
+			}
+			if (initialSettings.darkMode !== undefined) {
+				darkMode = initialSettings.darkMode;
+			}
+			if (initialSettings.seed !== undefined) {
+				seed = initialSettings.seed;
+				generateNew();
+			}
+		});
+	});
 
 	let placenameDataset = '';
 	placenameDatasetStore.subscribe(value => {
@@ -16,28 +31,25 @@
 	});
 
 	let isLoading = false;
-	let mapSet = undefined;
+	let mapSet: MapSet | undefined = undefined;
 	mapSetStore.subscribe(value => {
 		mapSet = value;
 		isLoading = false;
+		seed = undefined;
 	});
 
     async function generateNew() {
 		isLoading = true;
 		await init();
 		setTimeout(() => {
-			mapSetStore.set(createMap(placenameDataset, view3D, nightMode, undefined));
+			mapSetStore.set(createMap(placenameDataset, view3D, darkMode, seed));
 		}, 0);
     }
 
-	onMount(() => {
-		// generate new map if initialSeed is set
-		initialSeedStore.subscribe(value => {
-			if (value !== undefined) {
-				generateNew();
-			}
-		});
-	});
+	// update view when darkMode or view3D changes
+	$: if (mapSet) {
+		mapSet.updateView(view3D, darkMode);
+	}
 
 </script>
 
@@ -59,7 +71,7 @@
 	</div>
 
 	<div id="checkbox">
-		<input type="checkbox" id="presentation" bind:checked={nightMode} />
+		<input type="checkbox" id="presentation" bind:checked={darkMode} />
 		{$_('dark-mode')}
 	</div>
 </div>

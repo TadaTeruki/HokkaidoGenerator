@@ -5,4 +5,10 @@ export const placenameDatasetStore = writable('');
 
 export const mapSetStore: Writable<MapSet | undefined> = writable(undefined);
 
-export const initialSeedStore: Writable<number | undefined> = writable(undefined);
+export class InitialSettings {
+    seed: number | undefined;
+    view3D: boolean | undefined;
+    darkMode: boolean | undefined;
+}
+
+export const initialSettingsStore = writable(new InitialSettings());

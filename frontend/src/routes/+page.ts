@@ -1,5 +1,5 @@
 import { setupI18n } from "$lib/translation";
-import { initialSeedStore, placenameDatasetStore } from "./store";
+import { initialSettingsStore, placenameDatasetStore } from "./store";
 
 /** @type {import('./$types').PageLoad} */
 export async function load(event: any) {
@@ -8,10 +8,20 @@ export async function load(event: any) {
     const locale = localeSrc ? localeSrc : 'ja';
     setupI18n(locale);
 
-    const initialSeed = params.get('seed');
-    if (initialSeed) {
-        initialSeedStore.set(parseInt(initialSeed));
+    const initialSeedSrc = params.get('seed');
+    const initialSeed = function() {
+        if (initialSeedSrc) {
+            return parseInt(initialSeedSrc);
+        } else {
+            return undefined;
+        }
     }
+
+    initialSettingsStore.set({
+        seed: initialSeed(),
+        view3D: params.get('view3D') === 'true',
+        darkMode: params.get('darkMode') === 'true'
+    });
 
     await event.fetch('/dataset/placenames.csv').then((responses: any) => {
         return responses.text();

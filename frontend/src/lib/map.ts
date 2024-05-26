@@ -17,11 +17,16 @@ export class MapSet {
         this.view = view;
         this.placeName = placeName;
     }
+
+    updateView(view3D: boolean, darkMode: boolean) {
+        this.factors.updateNightMode(darkMode);
+		this.view.updateFactors(this.factors, view3D, darkMode);
+    }
 }
 
-export function createMap(placenameDataset: string, view3D: boolean, nightMode: boolean, presetSeed: number | undefined): MapSet {
+export function createMap(placenameDataset: string, view3D: boolean, darkMode: boolean, presetSeed: number | undefined): MapSet {
     const seed = presetSeed ? presetSeed : Math.floor(Math.random() * 1000000) + 1;
-    const mapFactors = new MapFactors(seed, placenameDataset, nightMode);
+    const mapFactors = new MapFactors(seed, placenameDataset, darkMode);
     history.replaceState(
         null,
         '',
@@ -50,7 +55,7 @@ export function createMap(placenameDataset: string, view3D: boolean, nightMode: 
 
     const population = '市街人口: ' + mapData.map.get_population().toLocaleString() + '人';
 
-    const mapView = new MapView(mapFactors, view3D, nightMode);
+    const mapView = new MapView(mapFactors, view3D, darkMode);
 
     return new MapSet(mapFactors, mapView, { cityName, address, population }); 
 
