@@ -90,7 +90,7 @@ export class MapData {
 		const imageData = this.createImage(
 			colormap,
 			8,
-			nightMode ? 0.3 : 0.65,
+			nightMode ? 0.4 : 0.65,
 			nightMode ? [0, 0, 0] : [255, 255, 255]
 		);
 		ctx.putImageData(imageData, 0, 0);

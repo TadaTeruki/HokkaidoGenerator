@@ -24,6 +24,10 @@
 	let mounted = false;
 
 	function preferedNightMode() {
+		const localNightMode = localStorage.getItem('nightMode');
+		if (localNightMode !== null) {
+			return localNightMode === 'true';
+		}
 		return window.matchMedia('(prefers-color-scheme: dark)').matches;
 	}
 
@@ -85,7 +89,7 @@
 			population = '市街人口: ' + mapData.map.get_population().toLocaleString() + '人';
 
 			mapView = new MapView(mapFactors, view3D, nightMode);
-		}, 150);
+		}, 500);
 	}
 
 	async function newMap() {
@@ -102,22 +106,22 @@
 	$: if (mounted) {
 		if (nightMode) {
 			document.documentElement.classList.add('dark');
+			document.documentElement.classList.remove('light');
+			localStorage.setItem('nightMode', 'true');
 		} else {
 			document.documentElement.classList.remove('dark');
+			document.documentElement.classList.add('light');
+			localStorage.setItem('nightMode', 'false');
 		}
 	}
 
 	$: if (mapView) {
-		mapView.updateStyle(view3D, nightMode);
-	}
-
-	$: if (mapView) {
-		mapView.updateFactors(mapFactors, nightMode);
+		mapView.updateFactors(mapFactors, view3D, nightMode);
 	}
 
 	$: if (mapFactors && mapView) {
 		mapFactors.updateNightMode(nightMode);
-		mapView.updateFactors(mapFactors, nightMode);
+		mapView.updateFactors(mapFactors, view3D, nightMode);
 	}
 </script>
 
@@ -134,17 +138,6 @@
 		{:else}
 			<Cityinfo {cityName} {address} {population} {seed} {mapView} />
 		{/if}
-
-		<div id="checkbox">
-			<input type="checkbox" id="presentation" bind:checked={view3D} />
-			3D表示
-		</div>
-
-		<div id="checkbox">
-			<input type="checkbox" id="presentation" bind:checked={nightMode} />
-			ダークモード (夜景)
-		</div>
-
 		<button on:click={newMap} id="generateButton" disabled={isLoading}>
 			{#if isLoading}
 				loading...
@@ -152,6 +145,16 @@
 				新しく生成
 			{/if}
 		</button>
+		<div id="checkbox">
+			<input type="checkbox" id="presentation" bind:checked={view3D} />
+			3D地形
+		</div>
+
+		<div id="checkbox">
+			<input type="checkbox" id="presentation" bind:checked={nightMode} />
+			ダークモード・夜景
+		</div>
+
 		{#if presentationMode}
 			<img src="/QR.png" alt="共有" id="qr" />
 		{/if}
@@ -161,9 +164,10 @@
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500&display=swap');
 
-	:global(:root) {
+	:global(:root.light) {
 		--page-bg: #fafafa;
 		--sub-bg: #f0f0f0;
+		--map-bg: linear-gradient(180deg, #eaf0f0 0%, #f0f0f0 30%);
 		--button-bg: #333;
 		--button-bg-hover: #888;
 		--button-text: #f0f0f0;
@@ -172,15 +176,44 @@
 		--sub-text-hover: #aaa;
 	}
 
-	:root.dark {
+	:global(:root.dark) {
 		--page-bg: #202020;
 		--sub-bg: #303030;
+		--map-bg: linear-gradient(180deg, #202020 0%, #252040 30%)
 		--button-bg: #555;
 		--button-bg-hover: #777;
 		--button-text: #f0f0f0;
 		--main-text: #f0f0f0;
 		--sub-text: #aaa;
 		--sub-text-hover: #aaa;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:global(:root) {
+			--page-bg: #202020;
+			--sub-bg: #303030;
+			--map-bg: linear-gradient(180deg, #202020 0%, #252040 30%);
+			--button-bg: #555;
+			--button-bg-hover: #777;
+			--button-text: #f0f0f0;
+			--main-text: #f0f0f0;
+			--sub-text: #aaa;
+			--sub-text-hover: #aaa;
+		}
+	}
+
+	@media (prefers-color-scheme: light) {
+		:global(:root) {
+			--page-bg: #fafafa;
+			--sub-bg: #f0f0f0;
+			--map-bg: linear-gradient(180deg, #eaf0f0 0%, #f0f0f0 30%);
+			--button-bg: #333;
+			--button-bg-hover: #888;
+			--button-text: #f0f0f0;
+			--main-text: #333;
+			--sub-text: #888;
+			--sub-text-hover: #aaa;
+		}
 	}
 
 	:global(body) {
@@ -192,7 +225,7 @@
 		width: 100vw;
 		height: 100vh;
 		background-color: var(--page-bg);
-		transition: background-color 0.5s;
+		transition: background-color 0.25s;
 	}
 
 	#map {
@@ -200,15 +233,8 @@
 		height: 100%;
 		display: flex;
 		align-items: center;
-		transition: background-color 0.5s;
-	}
-
-	.map-daytime {
-		background-color: linear-gradient(180deg, #e0f0f0 0%, #f0f0f0 30%);
-	}
-
-	.map-night {
-		background-image: linear-gradient(180deg, #202020 0%, #252040 30%);
+		background-image: var(--map-bg);
+		transition: background-color 0.25s;
 	}
 
 	#right {
@@ -282,6 +308,7 @@
 
 	#checkbox {
 		color: var(--sub-text);
+		font-size: 0.9rem;
 	}
 
 	#qr {

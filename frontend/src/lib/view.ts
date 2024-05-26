@@ -89,44 +89,50 @@ export class MapFactors {
 
 export class MapView {
 	maplibreMap: maplibre.Map | undefined;
-	factors: MapFactors;
-	view3D: boolean;
+	factors: MapFactors | undefined;
 
 	constructor(factors: MapFactors, view3D: boolean, nightMode: boolean) {
-		this.factors = factors;
-		this.view3D = view3D;
-		this.updateFactors(factors, nightMode);
+		this.updateFactors(factors, view3D, nightMode);
 	}
 
 	updateStyle(view3D: boolean, nightMode: boolean) {
-		this.view3D = view3D;
-		const mapStyle = setupMapStyle(this.factors, this.view3D, nightMode);
+		if (!this.factors) return;
+		const mapStyle = setupMapStyle(this.factors, view3D, nightMode);
 		this.maplibreMap?.setStyle(mapStyle);
 	}
 
-	updateFactors(factors: MapFactors, nightMode: boolean) {
+	updateFactors(factors: MapFactors, view3D: boolean, nightMode: boolean) {
+		const initial = !this.factors;
+		console.log('update factors', initial);
 		this.factors = factors;
-		const mapStyle = setupMapStyle(this.factors, this.view3D, nightMode);
 
-		const mapElement = document.getElementById('map');
-		if (mapElement) {
-			mapElement.innerHTML = '';
+		const mapStyle = setupMapStyle(this.factors, view3D, nightMode);
+
+		if (initial) {
+			
+			const mapElement = document.getElementById('map');
+			if (mapElement) {
+				mapElement.innerHTML = '';
+			}
+	
+			this.maplibreMap = new maplibre.Map({
+				container: 'map',
+				zoom: factors.mapData.map.get_population() > 20000 ? 10 : 10.5,
+				center: factors.originCoords,
+				style: mapStyle,
+				attributionControl: false,
+				renderWorldCopies: false,
+				pitch: 40,
+				maxPitch: 85,
+				bearing:
+					(factors.mapData.map.get_initial_angle() / Math.PI) * 180 +
+					45 * (factors.seed % 2 ? 1 : -1),
+				antialias: false,
+				preserveDrawingBuffer: true
+			});
+		} else {
+			this.maplibreMap?.setStyle(mapStyle);
 		}
-		this.maplibreMap = new maplibre.Map({
-			container: 'map',
-			zoom: factors.mapData.map.get_population() > 20000 ? 10.5 : 11,
-			center: factors.originCoords,
-			style: mapStyle,
-			attributionControl: false,
-			renderWorldCopies: false,
-			pitch: 40,
-			maxPitch: 85,
-			bearing:
-				(factors.mapData.map.get_initial_angle() / Math.PI) * 180 +
-				45 * (factors.seed % 2 ? 1 : -1),
-			antialias: false,
-			preserveDrawingBuffer: true
-		});
 	}
 }
 
@@ -187,8 +193,7 @@ function setupMapStyle(
 					? {
 							'line-color': '#ddccaa',
 							'line-width': 2.0,
-							'line-dasharray': [2, 2],
-							'line-blur': 1
+							'line-dasharray': [1, 8],
 						}
 					: {
 							'line-color': '#666',
@@ -202,9 +207,9 @@ function setupMapStyle(
 				paint: nightMode
 					? {
 							'line-color': '#ffedd5',
-							'line-width': 3.0,
+							'line-width': 2.0,
+							'line-gap-width': 1.0,
 							'line-dasharray': [1, 1],
-							'line-blur': 1
 						}
 					: {
 							'line-color': '#333',
