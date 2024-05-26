@@ -109,12 +109,11 @@ export class MapView {
 		const mapStyle = setupMapStyle(this.factors, view3D, nightMode);
 
 		if (initial) {
-			
 			const mapElement = document.getElementById('map');
 			if (mapElement) {
 				mapElement.innerHTML = '';
 			}
-	
+
 			this.maplibreMap = new maplibre.Map({
 				container: 'map',
 				zoom: factors.mapData.map.get_population() > 20000 ? 10 : 10.5,
@@ -193,7 +192,7 @@ function setupMapStyle(
 					? {
 							'line-color': '#ddccaa',
 							'line-width': 2.0,
-							'line-dasharray': [1, 8],
+							'line-dasharray': [1, 8]
 						}
 					: {
 							'line-color': '#666',
@@ -209,7 +208,7 @@ function setupMapStyle(
 							'line-color': '#ffedd5',
 							'line-width': 2.0,
 							'line-gap-width': 1.0,
-							'line-dasharray': [1, 1],
+							'line-dasharray': [1, 1]
 						}
 					: {
 							'line-color': '#333',

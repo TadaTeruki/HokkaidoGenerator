@@ -30,8 +30,15 @@
 		croppedCanvas.width = croppedWH;
 		croppedCanvas.height = croppedWH;
 		const croppedCtx = croppedCanvas.getContext('2d') as CanvasRenderingContext2D;
-		//croppedCtx.fillStyle = '#f0f0f0';
-		//croppedCtx.fillRect(0, 0, croppedWH, croppedWH);
+		// get background color
+		const upperBg = getComputedStyle(document.documentElement).getPropertyValue('--map-upper-bg');
+		const lowerBg = getComputedStyle(document.documentElement).getPropertyValue('--map-lower-bg');
+		// draw gradient background
+		const gradient = croppedCtx.createLinearGradient(0, 0, 0, croppedWH);
+		gradient.addColorStop(0, upperBg);
+		gradient.addColorStop(0.3, lowerBg);
+		croppedCtx.fillStyle = gradient;
+		croppedCtx.fillRect(0, 0, croppedWH, croppedWH);
 
 		croppedCtx.drawImage(
 			canvas,

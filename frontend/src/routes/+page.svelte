@@ -152,7 +152,7 @@
 
 		<div id="checkbox">
 			<input type="checkbox" id="presentation" bind:checked={nightMode} />
-			ダークモード・夜景
+			ダークモード (夜景)
 		</div>
 
 		{#if presentationMode}
@@ -167,7 +167,8 @@
 	:global(:root.light) {
 		--page-bg: #fafafa;
 		--sub-bg: #f0f0f0;
-		--map-bg: linear-gradient(180deg, #eaf0f0 0%, #f0f0f0 30%);
+		--map-upper-bg: #eaf0f0;
+		--map-lower-bg: #f0f0f0;
 		--button-bg: #333;
 		--button-bg-hover: #888;
 		--button-text: #f0f0f0;
@@ -179,7 +180,8 @@
 	:global(:root.dark) {
 		--page-bg: #202020;
 		--sub-bg: #303030;
-		--map-bg: linear-gradient(180deg, #202020 0%, #252040 30%)
+		--map-upper-bg: #202020;
+		--map-lower-bg: #252040;
 		--button-bg: #555;
 		--button-bg-hover: #777;
 		--button-text: #f0f0f0;
@@ -192,13 +194,8 @@
 		:global(:root) {
 			--page-bg: #202020;
 			--sub-bg: #303030;
-			--map-bg: linear-gradient(180deg, #202020 0%, #252040 30%);
-			--button-bg: #555;
-			--button-bg-hover: #777;
-			--button-text: #f0f0f0;
-			--main-text: #f0f0f0;
-			--sub-text: #aaa;
-			--sub-text-hover: #aaa;
+			--map-upper-bg: #202020;
+			--map-lower-bg: #252040;
 		}
 	}
 
@@ -206,13 +203,8 @@
 		:global(:root) {
 			--page-bg: #fafafa;
 			--sub-bg: #f0f0f0;
-			--map-bg: linear-gradient(180deg, #eaf0f0 0%, #f0f0f0 30%);
-			--button-bg: #333;
-			--button-bg-hover: #888;
-			--button-text: #f0f0f0;
-			--main-text: #333;
-			--sub-text: #888;
-			--sub-text-hover: #aaa;
+			--map-upper-bg: #eaf0f0;
+			--map-lower-bg: #f0f0f0;
 		}
 	}
 
@@ -233,7 +225,7 @@
 		height: 100%;
 		display: flex;
 		align-items: center;
-		background-image: var(--map-bg);
+		background-image: linear-gradient(180deg, var(--map-upper-bg) 0%, var(--map-lower-bg) 30%);
 		transition: background-color 0.25s;
 	}
 
