@@ -2,7 +2,6 @@
 	import { _ } from 'svelte-i18n';
 </script>
 
-
 <div class="title">{$_('title')}</div>
 <div class="subtitle">{$_('subtitle')}</div>
 <div class="description">{$_('description')}</div>

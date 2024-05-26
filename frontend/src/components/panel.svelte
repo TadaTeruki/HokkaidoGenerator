@@ -1,22 +1,24 @@
 <script lang="ts">
-	import Introduction from "../components/introduction.svelte";
-	
-    import { _ } from 'svelte-i18n';
-	import init from "$lib/engine/hokkaido_generator";
-	import { initialSettingsStore, mapSetStore, placenameDatasetStore } from "../routes/store";
-	import { MapSet, createMap } from "$lib/map";
-	import { onMount } from "svelte";
-    
+	import Introduction from '../components/introduction.svelte';
+
+	import { _ } from 'svelte-i18n';
+	import init from '$lib/engine/hokkaido_generator';
+	import { initialSettingsStore, mapSetStore, placenameDatasetStore } from '../routes/store';
+	import { MapSet, createMap } from '$lib/map';
+	import { onMount } from 'svelte';
+
 	let seed: number | undefined = undefined;
-    let view3D = false;
-    let darkMode = false;
+	let view3D = false;
+	let darkMode = false;
 	onMount(() => {
-		initialSettingsStore.subscribe(initialSettings => {
+		initialSettingsStore.subscribe((initialSettings) => {
 			if (initialSettings.view3D !== undefined) {
 				view3D = initialSettings.view3D;
 			}
 			if (initialSettings.darkMode !== undefined) {
 				darkMode = initialSettings.darkMode;
+			} else {
+				darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 			}
 			if (initialSettings.seed !== undefined) {
 				seed = initialSettings.seed;
@@ -26,45 +28,53 @@
 	});
 
 	let placenameDataset = '';
-	placenameDatasetStore.subscribe(value => {
+	placenameDatasetStore.subscribe((value) => {
 		placenameDataset = value;
 	});
 
 	let isLoading = false;
 	let mapSet: MapSet | undefined = undefined;
-	mapSetStore.subscribe(value => {
+	mapSetStore.subscribe((value) => {
 		mapSet = value;
 		isLoading = false;
 		seed = undefined;
 	});
 
-    async function generateNew() {
+	async function generateNew() {
 		isLoading = true;
 		await init();
 		setTimeout(() => {
 			mapSetStore.set(createMap(placenameDataset, view3D, darkMode, seed));
 		}, 0);
-    }
+	}
 
 	// update view when darkMode or view3D changes
 	$: if (mapSet) {
 		mapSet.updateView(view3D, darkMode);
+		if (darkMode) {
+			document.documentElement.classList.add('dark');
+			document.documentElement.classList.remove('light');
+			localStorage.setItem('nightMode', 'true');
+		} else {
+			document.documentElement.classList.remove('dark');
+			document.documentElement.classList.add('light');
+			localStorage.setItem('nightMode', 'false');
+		}
 	}
-
 </script>
 
 <div id="control">
 	<Introduction />
 	{#key isLoading}
-	<button on:click={generateNew} id="generateButton" disabled={isLoading}>
-		{#if isLoading}
-			{$_('loading')}
-		{:else}
-			{$_('generate-new')}
-		{/if}
-	</button>
+		<button on:click={generateNew} id="generateButton" disabled={isLoading}>
+			{#if isLoading}
+				{$_('loading')}
+			{:else}
+				{$_('generate-new')}
+			{/if}
+		</button>
 	{/key}
-	
+
 	<div id="checkbox">
 		<input type="checkbox" id="presentation" bind:checked={view3D} />
 		{$_('3d-terrain')}
@@ -77,7 +87,6 @@
 </div>
 
 <style>
-
 	#control {
 		flex: 1;
 		display: flex;
@@ -109,5 +118,4 @@
 	button:hover {
 		background-color: var(--button-bg-hover);
 	}
-
 </style>

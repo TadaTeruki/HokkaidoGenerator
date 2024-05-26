@@ -1,14 +1,14 @@
 {
-    "nav-title": "Hokkaido Generator 北海道ジェネレータ",
-    "generate-new": "新しく生成",
-    "3d-terrain": "3D地形",
-    "dark-mode": "ダークモード (夜景)",
-    
-    "title": "Hokkaido Generator",
-    "subtitle": "〜 北海道ジェネレータ 〜",
-    "description": "実在しない北海道の市街を生成",
-    "loading": "生成中...",
+	"nav-title": "Hokkaido Generator 北海道ジェネレータ",
+	"generate-new": "新しく生成",
+	"3d-terrain": "3D地形",
+	"dark-mode": "ダークモード (夜景)",
 
-    "explanation-0": "片側に地図が表示されます。",
-    "explanation-1": "生成には数秒かかることがあります。"
+	"title": "Hokkaido Generator",
+	"subtitle": "〜 北海道ジェネレータ 〜",
+	"description": "実在しない北海道の市街を生成",
+	"loading": "生成中...",
+
+	"explanation-0": "片側に地図が表示されます。",
+	"explanation-1": "生成には数秒かかることがあります。"
 }

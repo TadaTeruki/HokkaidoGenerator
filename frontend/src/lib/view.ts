@@ -74,7 +74,7 @@ export class MapFactors {
 		return this.heightmap.toDataURL();
 	}
 
-	updateNightMode(darkMode: boolean) {
+	updateDarkMode(darkMode: boolean) {
 		this.mapData.drawVisual(this.visual, darkMode);
 	}
 }

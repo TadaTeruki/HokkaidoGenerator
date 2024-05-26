@@ -1,6 +1,7 @@
 <script>
-    import { _ } from 'svelte-i18n';
+	import { _ } from 'svelte-i18n';
 </script>
+
 <div id="map" />
 <div id="right">
 	<header id="header">
@@ -8,13 +9,13 @@
 		<a href="https://github.com/TadaTeruki/HokkaidoGenerator">GitHub</a> |
 		<a href="https://peruki.dev">peruki.dev</a>
 	</header>
-    <slot />
+	<slot />
 </div>
 
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500&display=swap');
-    
-	:global(:root) {
+
+	:global(:root.light) {
 		--page-bg: #fafafa;
 		--sub-bg: #f0f0f0;
 		--map-upper-bg: #eaf0f0;
@@ -25,6 +26,21 @@
 		--main-text: #333;
 		--sub-text: #888;
 		--sub-text-hover: #aaa;
+	}
+
+	@media (prefers-color-scheme: light) {
+		:global(:root) {
+			--page-bg: #fafafa;
+			--sub-bg: #f0f0f0;
+			--map-upper-bg: #eaf0f0;
+			--map-lower-bg: #f0f0f0;
+			--button-bg: #333;
+			--button-bg-hover: #888;
+			--button-text: #f0f0f0;
+			--main-text: #333;
+			--sub-text: #888;
+			--sub-text-hover: #aaa;
+		}
 	}
 
 	:global(:root.dark) {
@@ -38,6 +54,21 @@
 		--main-text: #f0f0f0;
 		--sub-text: #aaa;
 		--sub-text-hover: #aaa;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:global(:root) {
+			--page-bg: #202020;
+			--sub-bg: #303030;
+			--map-upper-bg: #202020;
+			--map-lower-bg: #252040;
+			--button-bg: #555;
+			--button-bg-hover: #777;
+			--button-text: #f0f0f0;
+			--main-text: #f0f0f0;
+			--sub-text: #aaa;
+			--sub-text-hover: #aaa;
+		}
 	}
 
 	:global(body) {
@@ -68,8 +99,6 @@
 		flex-direction: column;
 	}
 
-	/* responsive for mobile */
-	/* if the screen width is less than its height, it is considered as mobile */
 	@media (max-aspect-ratio: 1/1) {
 		:global(body) {
 			flex-direction: column;
@@ -97,10 +126,9 @@
 		color: var(--sub-text-hover);
 	}
 
-    :global(a) {
+	:global(a) {
 		color: var(--sub-text);
 		border-bottom: 0.5px solid var(--sub-text);
 		text-decoration: none;
 	}
-
 </style>
