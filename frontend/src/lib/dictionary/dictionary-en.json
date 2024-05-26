@@ -1,0 +1,13 @@
+{
+    "nav-title": "Hokkaido Generator by Teruki TADA",
+    "generate-new": "Generate",
+    "3d-terrain": "3D Terrain",
+    "dark-mode": "Dark Mode",
+    
+    "title": "Hokkaido Generator",
+    "subtitle": "Generate fictional towns in Hokkaido",
+    "description": " ",
+
+    "explanation-0": "Map will be displayed on the left side of the page (top side on mobile).",
+    "explanation-1": "It may take a few seconds to generate."
+}

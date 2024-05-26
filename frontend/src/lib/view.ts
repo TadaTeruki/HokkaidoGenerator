@@ -1,14 +1,6 @@
-import init from '$lib/engine/hokkaido_generator';
-import { MapData } from '$lib/map';
+import { NetworkPath } from '$lib/engine/hokkaido_generator';
 import maplibre, { type StyleSpecification } from 'maplibre-gl';
-
-export async function initWasm() {
-	await init();
-}
-
-export async function getDataset() {
-	return await fetch('/dataset/placenames.csv').then((response) => response.text());
-}
+import { MapData } from './data';
 
 export class MapFactors {
 	visual: HTMLCanvasElement;
@@ -45,7 +37,7 @@ export class MapFactors {
 
 		const scale = 1.4;
 
-		this.mapData.map.network_paths().map((path) => {
+		this.mapData.map.network_paths().map((path: NetworkPath) => {
 			const node1 = path.node1();
 			const node2 = path.node2();
 
@@ -103,7 +95,6 @@ export class MapView {
 
 	updateFactors(factors: MapFactors, view3D: boolean, nightMode: boolean) {
 		const initial = !this.factors;
-		console.log('update factors', initial);
 		this.factors = factors;
 
 		const mapStyle = setupMapStyle(this.factors, view3D, nightMode);

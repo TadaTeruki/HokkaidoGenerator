@@ -1,6 +1,11 @@
-<div class="title">Hokkaido Generator</div>
-<div class="subtitle">〜 北海道ジェネレータ 〜</div>
-<div class="description">実在しない北海道の市街を生成</div>
+<script>
+	import { _ } from 'svelte-i18n';
+</script>
+
+
+<div class="title">{$_('title')}</div>
+<div class="subtitle">{$_('subtitle')}</div>
+<div class="description">{$_('description')}</div>
 
 <div class="credit">
 	Copyright © 2024 Teruki TADA<br />
@@ -9,8 +14,8 @@
 	<a href="https://maplibre.org">Maplibre GL JS</a>
 </div>
 
-<div class="description">片側に地図が表示されます。</div>
-<div class="description">生成には数秒かかることがあります。</div>
+<div class="description">{$_('explanation-0')}</div>
+<div class="description">{$_('explanation-1')}</div>
 
 <style>
 	.title {
