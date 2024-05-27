@@ -9,29 +9,33 @@
 	export let seed = 0;
 	export let locale = '';
 
-	let origin = '';
 	let copiedSeed = -1;
+
 	// image data URL
 	let screenshot: string | undefined = undefined;
 
-	onMount(() => {
-		origin = window.location.origin;
-	});
-
 	function shareTextJa(cityNameKanji: string, population: string) {
-		const shareText = `${cityNameKanji}市街 (${population}) - 北海道ジェネレータ - ${origin}/?seed=${seed} #HokkaidoGenerator`;
+		const shareText = `${cityNameKanji}市街 (${population}) - 北海道ジェネレータ`;
 		return shareText;
 	}
 
 	function shareTextEn(cityNameRome: string, population: string) {
-		const shareText = `${cityNameRome} (${population}) - Hokkaido Generator - ${origin}/?seed=${seed} #HokkaidoGenerator`;
+		const shareText = `${cityNameRome} (${population}) - Hokkaido Generator`;
 		return shareText;
+	}
+
+	function shareURL() {
+		return `${window.location.origin}/?seed=${seed} #HokkaidoGenerator`;
 	}
 
 	function shareText(placeName: PlaceName) {
 		return locale === 'ja'
 			? shareTextJa(placeName.cityNameKanji, placeName.populationJa)
 			: shareTextEn(placeName.cityNameRome, placeName.populationEn);
+	}
+
+	function shareTextWithUrl(placeName: PlaceName) {
+		return `${shareText(placeName)} ${shareURL()}`;
 	}
 
 	function copyToClipboard(text: string) {
@@ -51,7 +55,8 @@
 	<p class="shareBox">
 		{#if mapSet}
 			{shareText(mapSet?.placeName)}<br />
-			<button on:click={() => copyToClipboard(shareText(mapSet?.placeName))}
+			{shareURL()}<br />
+			<button on:click={() => copyToClipboard(shareTextWithUrl(mapSet?.placeName))}
 				>{$_('copy-to-clipboard')}</button
 			>
 			{copiedSeed === seed ? $_('copied') : ''}<br />
