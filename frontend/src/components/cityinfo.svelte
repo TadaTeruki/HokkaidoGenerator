@@ -13,13 +13,10 @@
 	// image data URL
 	let screenshot: string | undefined = undefined;
 
-	function shareTextJa(cityNameKanji: string, population: string) {
-		const shareText = `${cityNameKanji}市街 (${population}) - 北海道ジェネレータ`;
-		return shareText;
-	}
-
-	function shareTextEn(cityNameRome: string, population: string) {
-		const shareText = `${cityNameRome} (${population}) - Hokkaido Generator`;
+	function shareText(cityNameRome: string, population: string) {
+		const title = locale === 'ja' ? '北海道ジェネレータ' : 'Hokkaido Generator';
+		const version = $_('version');
+		const shareText = `${cityNameRome} (${population}) - ${title} ${version}`;
 		return shareText;
 	}
 
@@ -27,14 +24,12 @@
 		return `${window.location.origin}/?seed=${seed} #HokkaidoGenerator`;
 	}
 
-	function shareText(placeName: PlaceName) {
-		return locale === 'ja'
-			? shareTextJa(placeName.cityNameKanji, placeName.populationJa)
-			: shareTextEn(placeName.cityNameRome, placeName.populationEn);
-	}
-
 	function shareTextWithUrl(placeName: PlaceName) {
-		return `${shareText(placeName)} ${shareURL()}`;
+		const text =
+			locale === 'ja'
+				? shareText(placeName.cityNameKanji, placeName.populationJa)
+				: shareText(placeName.cityNameRome, placeName.populationEn);
+		return `${text} ${shareURL()}`;
 	}
 
 	function copyToClipboard(text: string) {
