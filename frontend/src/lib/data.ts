@@ -27,14 +27,17 @@ export class MapData {
 	) {
 		while (true) {
 			console.log('creating map with seed', seed);
-
-			const map = create_standard_map(seed, x_expand_prop, dataset);
-			if (map) {
-				this.map = map;
-				break;
-			} else {
-				seed += 1 + (Math.abs(xorshift(seed)) % 100);
+			try {
+				const map = create_standard_map(seed, x_expand_prop, dataset);
+				if (map) {
+					this.map = map;
+					break;
+				}
+			} catch (e) {
+				console.log('error creating map with seed', seed);
+				console.error(e);
 			}
+			seed += 1 + (Math.abs(xorshift(seed)) % 100);
 		}
 		this.elevationBuffer = new ElevationBuffer(this.map, imageWidth, imageHeight);
 		this.imageWidth = imageWidth;
