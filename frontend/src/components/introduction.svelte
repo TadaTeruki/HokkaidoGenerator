@@ -15,6 +15,7 @@
 
 <div class="description">{$_('explanation-0')}</div>
 <div class="description">{$_('explanation-1')}</div>
+<div class="description">{$_('explanation-2')}</div>
 
 <style>
 	.title {
@@ -34,6 +35,7 @@
 
 	.credit {
 		margin-top: 1rem;
+		margin-bottom: 1rem;
 		font-size: 1rem;
 		color: var(--sub-text);
 		line-height: 1.5;

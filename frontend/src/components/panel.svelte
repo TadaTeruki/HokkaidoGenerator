@@ -13,7 +13,7 @@
 	let darkMode = false;
 	let locale = '';
 
-	let isLoading = false;
+	let isLoading = true;
 	let mapSet: MapSet | undefined = undefined;
 
 	$: if (mapSet)
@@ -37,10 +37,14 @@
 			if (initialSettings.seed !== undefined) {
 				generateNew(initialSettings.seed);
 			} else {
+				isLoading = false;
 				mapSetStore.set(undefined);
 			}
 		});
 		mapSetStore.subscribe((value) => {
+			if (!value) {
+				return;
+			}
 			mapSet = value;
 			isLoading = false;
 		});

@@ -16,6 +16,7 @@
 	"not-taken": "未撮影",
 	"take-screenshot": "地図のスクリーンショットを撮影",
 
-	"explanation-0": "片側に地図が表示されます。",
-	"explanation-1": "生成には数秒かかることがあります。"
+	"explanation-0": "架空の地形・地名・道路網を手続き的に生成します。",
+	"explanation-1": "片側に地図が表示されます。",
+	"explanation-2": "生成には数秒かかることがあります。"
 }

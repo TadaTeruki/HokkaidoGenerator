@@ -1,11 +1,11 @@
 {
-	"nav-title": "Hokkaido Generator by Teruki TADA",
+	"nav-title": "Hokkaido Generator",
 	"generate-new": "Generate",
 	"3d-terrain": "3D Terrain",
 	"dark-mode": "Dark Mode",
 
 	"title": "Hokkaido Generator",
-	"subtitle": "Generate fictional towns in Hokkaido",
+	"subtitle": "Procedural generation of fictional towns in Hokkaido",
 	"description": " ",
 	"loading": "Loading...",
 
@@ -15,7 +15,7 @@
 	"screenshot-of-map": "Screenshot of the map",
 	"not-taken": "No screenshot",
 	"take-screenshot": "Take a screenshot",
-
-	"explanation-0": "The map will be displayed on the left side of the page (top side on mobile).",
-	"explanation-1": "It may take a few seconds to generate."
+	"explanation-0": "This tool procedurally generates fictional terrain, place names, and road networks.",
+	"explanation-1": "The map will be displayed on the left side of the page (top side on mobile).",
+	"explanation-2": "It may take a few seconds to generate."
 }
