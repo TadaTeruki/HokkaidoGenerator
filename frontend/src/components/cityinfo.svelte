@@ -1,12 +1,9 @@
 <script lang="ts">
-	import type { MapView } from '$lib/view';
+	import type { MapSet } from '$lib/map';
 	import { onMount } from 'svelte';
 
-	export let cityName = ['', ''];
-	export let address = '';
-	export let population = '';
+	export let mapSet: MapSet | undefined = undefined;
 	export let seed = 0;
-	export let mapView: MapView | undefined = undefined;
 
 	let origin = '';
 	let copiedSeed = -1;
@@ -23,7 +20,7 @@
 	}
 
 	function mapScreenShot() {
-		const canvas = mapView?.maplibreMap?.getCanvas() as HTMLCanvasElement;
+		const canvas = mapSet?.view.maplibreMap?.getCanvas() as HTMLCanvasElement;
 		const croppedCanvas = document.createElement('canvas');
 
 		const croppedWH = canvas.width > canvas.height ? canvas.height : canvas.width;
@@ -64,20 +61,22 @@
 
 <div class="citynamebox-outer">
 	<div class="citynamebox-inner">
-		<div class="citykana">{cityName[1] || ''}</div>
-		<div class="cityname">{cityName[0] || ''}</div>
+		<div class="citykana">{mapSet?.placeName.cityName[1] || ''}</div>
+		<div class="cityname">{mapSet?.placeName.cityName[0] || ''}</div>
 	</div>
-	<span class="citypostfix">{cityName[0] ? '市街' : ''}</span>
+	<span class="citypostfix">{mapSet?.placeName.cityName[0] ? '市街' : ''}</span>
 	<br />
 </div>
-<div class="address">{address}</div>
-<div class="population">{population}</div>
+<div class="address">{mapSet?.placeName.address}</div>
+<div class="population">{mapSet?.placeName.population}</div>
 <details class="share">
 	<summary>共有する</summary>
 	<p class="shareBox">
-		{#if cityName[0]}
-			{shareText(cityName, population)}<br />
-			<button on:click={() => copyToClipboard(shareText(cityName, population))}
+		{#if mapSet?.placeName.cityName[0]}
+			{shareText(mapSet?.placeName.cityName, mapSet?.placeName.population)}<br />
+			<button
+				on:click={() =>
+					copyToClipboard(shareText(mapSet?.placeName.cityName, mapSet?.placeName.population))}
 				>クリップボードにコピー</button
 			>
 			{copiedSeed === seed ? 'コピーしました' : ''}<br />

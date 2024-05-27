@@ -6,10 +6,15 @@
 	import { initialSettingsStore, mapSetStore, placenameDatasetStore } from '../routes/store';
 	import { MapSet, createMap } from '$lib/map';
 	import { onMount } from 'svelte';
+	import Cityinfo from './cityinfo.svelte';
 
-	let seed: number | undefined = undefined;
+	let seed: number;
 	let view3D = false;
 	let darkMode = false;
+
+	$: if (mapSet)
+		history.replaceState(null, '', `/?seed=${seed}&view3D=${view3D}&darkMode=${darkMode}`);
+
 	onMount(() => {
 		initialSettingsStore.subscribe((initialSettings) => {
 			if (initialSettings.view3D !== undefined) {
@@ -21,9 +26,12 @@
 				darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 			}
 			if (initialSettings.seed !== undefined) {
-				seed = initialSettings.seed;
-				generateNew();
+				generateNew(initialSettings.seed);
 			}
+		});
+		mapSetStore.subscribe((value) => {
+			mapSet = value;
+			isLoading = false;
 		});
 	});
 
@@ -34,13 +42,13 @@
 
 	let isLoading = false;
 	let mapSet: MapSet | undefined = undefined;
-	mapSetStore.subscribe((value) => {
-		mapSet = value;
-		isLoading = false;
-		seed = undefined;
-	});
 
-	async function generateNew() {
+	async function generateNew(presetSeed?: number) {
+		if (presetSeed) {
+			seed = presetSeed;
+		} else {
+			seed = Math.floor(Math.random() * 1000000) + 1;
+		}
 		isLoading = true;
 		await init();
 		setTimeout(() => {
@@ -64,9 +72,13 @@
 </script>
 
 <div id="control">
-	<Introduction />
+	{#if mapSet}
+		<Cityinfo {mapSet} {seed} />
+	{:else}
+		<Introduction />
+	{/if}
 	{#key isLoading}
-		<button on:click={generateNew} id="generateButton" disabled={isLoading}>
+		<button on:click={() => generateNew()} id="generateButton" disabled={isLoading}>
 			{#if isLoading}
 				{$_('loading')}
 			{:else}

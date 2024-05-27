@@ -5,7 +5,7 @@ import { initialSettingsStore, placenameDatasetStore } from './store';
 export async function load(event: any) {
 	const params = new URLSearchParams(event.url.search);
 	const localeSrc = params.get('locale');
-	const locale = localeSrc ? localeSrc : 'ja';
+	const locale = localeSrc ? localeSrc : undefined;
 	setupI18n(locale);
 
 	const initialSeedSrc = params.get('seed');

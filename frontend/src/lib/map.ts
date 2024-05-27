@@ -28,11 +28,9 @@ export function createMap(
 	placenameDataset: string,
 	view3D: boolean,
 	darkMode: boolean,
-	presetSeed: number | undefined
+	seed: number
 ): MapSet {
-	const seed = presetSeed ? presetSeed : Math.floor(Math.random() * 1000000) + 1;
 	const mapFactors = new MapFactors(seed, placenameDataset, darkMode);
-	history.replaceState(null, '', `/?seed=${seed}`);
 
 	const mapData = mapFactors.mapData;
 	const cityName: [string, string] = [
