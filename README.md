@@ -1,12 +1,12 @@
-# Hokkaido Generator - 北海道ジェネレータ -
+# Hokkaido Generator - 北海道ジェネレータ - v2
 
-Website: **[hokkaidogenerator.peruki.dev/](https://hokkaidogenerator.peruki.dev/)**
+Website: **[v2hokkaidogenerator.peruki.dev/](https://v2hokkaidogenerator.peruki.dev/)**
 
 実在しない北海道の市街を自動生成します。
 
-![HokkaidoGenerator](https://github.com/TadaTeruki/HokkaidoGenerator/assets/69315285/40685a5f-f91d-48a5-8551-54113ee9044d)
+![Showcase](image/showcase0.png)
 
-![Screenshot](https://github.com/TadaTeruki/HokkaidoGenerator/assets/69315285/a8409246-99fc-4e7d-acbe-bca2adb36e93)
+![DarkMode](image/showcase1.png)
 
 ## ビルド方法
 
