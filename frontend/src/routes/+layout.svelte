@@ -1,11 +1,16 @@
 <script>
 	import { _ } from 'svelte-i18n';
+
+	function backToTitle() {
+		history.replaceState(null, '', '/');
+		location.reload();
+	}
 </script>
 
 <div id="map" />
 <div id="right">
 	<header id="header">
-		<a href="/"> {$_('nav-title')} </a> |
+		<a href="/" on:click={backToTitle}> {$_('nav-title')} </a> |
 		<a href="https://github.com/TadaTeruki/HokkaidoGenerator">GitHub</a> |
 		<a href="https://peruki.dev">peruki.dev</a>
 	</header>

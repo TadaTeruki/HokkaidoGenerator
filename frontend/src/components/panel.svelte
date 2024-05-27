@@ -13,6 +13,9 @@
 	let darkMode = false;
 	let locale = '';
 
+	let isLoading = false;
+	let mapSet: MapSet | undefined = undefined;
+
 	$: if (mapSet)
 		history.replaceState(
 			null,
@@ -33,6 +36,8 @@
 			locale = initialSettings.locale;
 			if (initialSettings.seed !== undefined) {
 				generateNew(initialSettings.seed);
+			} else {
+				mapSetStore.set(undefined);
 			}
 		});
 		mapSetStore.subscribe((value) => {
@@ -45,9 +50,6 @@
 	placenameDatasetStore.subscribe((value) => {
 		placenameDataset = value;
 	});
-
-	let isLoading = false;
-	let mapSet: MapSet | undefined = undefined;
 
 	async function generateNew(presetSeed?: number) {
 		if (presetSeed) {
