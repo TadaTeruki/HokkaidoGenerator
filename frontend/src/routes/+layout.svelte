@@ -23,7 +23,6 @@
 
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500&display=swap');
-	@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
 
 	:global(:root.light) {
 		--page-bg: #fafafa;
@@ -86,7 +85,7 @@
 		display: flex;
 		flex-direction: row;
 		align-items: center;
-		font-family: 'Roboto', 'Zen Kaku Gothic New', sans-serif;
+		font-family: 'Zen Kaku Gothic New', sans-serif;
 		width: 100vw;
 		height: 100vh;
 		background-color: var(--page-bg);

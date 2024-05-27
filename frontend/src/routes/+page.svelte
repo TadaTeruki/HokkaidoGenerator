@@ -56,7 +56,7 @@
 	});
 
 	async function generateNew(presetSeed?: number) {
-		if (presetSeed) {
+		if (presetSeed !== undefined) {
 			seed = presetSeed;
 		} else {
 			seed = Math.floor(Math.random() * 1000000) + 1;
