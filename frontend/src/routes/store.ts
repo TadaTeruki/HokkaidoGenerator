@@ -9,6 +9,7 @@ export class InitialSettings {
 	seed: number | undefined;
 	view3D: boolean | undefined;
 	darkMode: boolean | undefined;
+	locale: string = 'en';
 }
 
 export const initialSettingsStore = writable(new InitialSettings());

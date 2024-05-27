@@ -1,17 +1,15 @@
-import { _, init, addMessages, getLocaleFromNavigator } from 'svelte-i18n';
+import { _, init, addMessages } from 'svelte-i18n';
 
 import en from './dictionary/en.json';
 import ja from './dictionary/ja.json';
 
-function setupI18n(defaultLocale: string | undefined) {
+function setupI18n(defaultLocale: string) {
 	addMessages('en', en);
 	addMessages('ja', ja);
 
-	const initialLocale = defaultLocale || getLocaleFromNavigator();
-
 	init({
 		fallbackLocale: 'en',
-		initialLocale: initialLocale
+		initialLocale: defaultLocale
 	});
 }
 

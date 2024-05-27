@@ -1,11 +1,12 @@
 import { setupI18n } from '$lib/translation';
+import { getLocaleFromNavigator } from 'svelte-i18n';
 import { initialSettingsStore, placenameDatasetStore } from './store';
 
 /** @type {import('./$types').PageLoad} */
 export async function load(event: any) {
 	const params = new URLSearchParams(event.url.search);
 	const localeSrc = params.get('locale');
-	const locale = localeSrc ? localeSrc : undefined;
+	const locale = localeSrc ? localeSrc : getLocaleFromNavigator() || 'en';
 	setupI18n(locale);
 
 	const initialSeedSrc = params.get('seed');
@@ -36,7 +37,8 @@ export async function load(event: any) {
 	initialSettingsStore.set({
 		seed: initialSeed,
 		view3D: view3D,
-		darkMode: darkMode
+		darkMode: darkMode,
+		locale: locale
 	});
 
 	await event

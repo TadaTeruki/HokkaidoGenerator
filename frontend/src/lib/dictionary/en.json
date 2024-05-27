@@ -9,6 +9,13 @@
 	"description": " ",
 	"loading": "Loading...",
 
+	"share": "Share",
+	"copy-to-clipboard": "Copy to clipboard",
+	"copied": "Copied!",
+	"screenshot-of-map": "Screenshot of the map",
+	"not-taken": "No screenshot",
+	"take-screenshot": "Take a screenshot",
+
 	"explanation-0": "The map will be displayed on the left side of the page (top side on mobile).",
 	"explanation-1": "It may take a few seconds to generate."
 }

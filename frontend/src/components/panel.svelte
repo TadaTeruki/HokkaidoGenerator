@@ -11,9 +11,14 @@
 	let seed: number;
 	let view3D = false;
 	let darkMode = false;
+	let locale = '';
 
 	$: if (mapSet)
-		history.replaceState(null, '', `/?seed=${seed}&view3D=${view3D}&darkMode=${darkMode}`);
+		history.replaceState(
+			null,
+			'',
+			`/?seed=${seed}&view3D=${view3D}&darkMode=${darkMode}&locale=${locale}`
+		);
 
 	onMount(() => {
 		initialSettingsStore.subscribe((initialSettings) => {
@@ -25,6 +30,7 @@
 			} else {
 				darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 			}
+			locale = initialSettings.locale;
 			if (initialSettings.seed !== undefined) {
 				generateNew(initialSettings.seed);
 			}
@@ -73,7 +79,7 @@
 
 <div id="control">
 	{#if mapSet}
-		<Cityinfo {mapSet} {seed} />
+		<Cityinfo {mapSet} {seed} {locale} />
 	{:else}
 		<Introduction />
 	{/if}

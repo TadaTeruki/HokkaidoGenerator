@@ -9,6 +9,13 @@
 	"description": "実在しない北海道の市街を生成",
 	"loading": "生成中...",
 
+	"share": "共有する",
+	"copy-to-clipboard": "クリップボードにコピー",
+	"copied": "コピーしました",
+	"screenshot-of-map": "地図のスクリーンショット",
+	"not-taken": "未撮影",
+	"take-screenshot": "地図のスクリーンショットを撮影",
+
 	"explanation-0": "片側に地図が表示されます。",
 	"explanation-1": "生成には数秒かかることがあります。"
 }
