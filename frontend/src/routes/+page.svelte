@@ -113,6 +113,11 @@
 				新しく生成
 			{/if}
 		</button>
+		<div id="newversion">
+			<a href="https://v2hokkaidogenerator.peruki.dev/" target="_blank"
+				>このWebページには、アップデート版(v2)が存在します。</a
+			>
+		</div>
 		{#if presentationMode}
 			<img src="/QR.png" alt="共有" id="qr" />
 		{/if}
@@ -184,6 +189,13 @@
 
 	#header:hover {
 		color: #aaa;
+	}
+
+	#newversion {
+		font-size: 0.8rem;
+		color: #888;
+		margin-: 0.8rem;
+		text-align: center;
 	}
 
 	a {
