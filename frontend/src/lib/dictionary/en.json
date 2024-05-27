@@ -3,10 +3,11 @@
 	"generate-new": "Generate",
 	"3d-terrain": "3D Terrain",
 	"dark-mode": "Dark Mode",
+	"version": "v2",
 
 	"title": "Hokkaido Generator",
 	"subtitle": " ",
-	"description": "Procedural generator of fictional towns in Hokkaido",
+	"description": "Procedural generation of fictional towns in Hokkaido",
 	"loading": "Loading...",
 
 	"share": "Share",

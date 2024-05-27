@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { MapSet, PlaceName } from '$lib/map';
-	import { onMount } from 'svelte';
 	import CitynameEn from './citynameEn.svelte';
 	import { _ } from 'svelte-i18n';
 	import CitynameJa from './citynameJa.svelte';
@@ -54,8 +53,7 @@
 	<summary>{$_('share')}</summary>
 	<p class="shareBox">
 		{#if mapSet}
-			{shareText(mapSet?.placeName)}<br />
-			{shareURL()}<br />
+			{shareTextWithUrl(mapSet?.placeName)}<br />
 			<button on:click={() => copyToClipboard(shareTextWithUrl(mapSet?.placeName))}
 				>{$_('copy-to-clipboard')}</button
 			>

@@ -10,11 +10,15 @@
 <div id="map" />
 <div id="right">
 	<header id="header">
-		<a href="/" on:click={backToTitle}> {$_('nav-title')} </a> |
+		<a href="/" on:click={backToTitle}> {$_('nav-title')} {$_('version')} </a> |
 		<a href="https://github.com/TadaTeruki/HokkaidoGenerator" target="_blank">GitHub</a> |
 		<a href="https://peruki.dev" target="_blank">peruki.dev</a>
 	</header>
 	<slot />
+	<footer id="footer">
+		Copyright © 2024
+		<a href="https://peruki.dev" target="_blank">Teruki TADA</a>
+	</footer>
 </div>
 
 <style>
@@ -130,6 +134,13 @@
 
 	#header:hover {
 		color: var(--sub-text-hover);
+	}
+
+	#footer {
+		font-size: 0.8rem;
+		color: var(--sub-text);
+		text-align: center;
+		margin: 0.8rem auto;
 	}
 
 	:global(a) {

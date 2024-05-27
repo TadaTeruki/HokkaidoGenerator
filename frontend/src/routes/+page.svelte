@@ -84,7 +84,7 @@
 </script>
 
 <svelte:head>
-	<title>{$_('title')}</title>
+	<title>{$_('title')} {$_('version')}</title>
 	<meta name="description" content={$_('description')} />
 	<meta property="og:title" content={$_('title')} />
 	<meta property="og:description" content={$_('description')} />
