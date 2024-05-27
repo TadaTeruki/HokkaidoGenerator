@@ -4,9 +4,13 @@ Website: **[v2hokkaidogenerator.peruki.dev/](https://v2hokkaidogenerator.peruki.
 
 実在しない北海道の市街を自動生成します。
 
+## プレビュー
+
 ![Showcase](image/showcase0.png)
+[Seed: 545903](https://v2hokkaidogenerator.peruki.dev/?seed=545903)
 
 ![DarkMode](image/showcase1.png)
+[Seed: 262905](https://v2hokkaidogenerator.peruki.dev/?seed=262905)
 
 ## ビルド方法
 
