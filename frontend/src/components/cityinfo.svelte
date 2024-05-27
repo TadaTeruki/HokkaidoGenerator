@@ -14,10 +14,11 @@
 	let screenshot: string | undefined = undefined;
 
 	function shareText(cityNameRome: string, population: string) {
-		const title = locale === 'ja' ? '北海道ジェネレータ' : 'Hokkaido Generator';
-		const version = $_('version');
-		const shareText = `${cityNameRome} (${population}) - ${title} ${version}`;
-		return shareText;
+		if (locale === 'ja') {
+			return `${cityNameRome}市街 (${population}) - 北海道ジェネレータ ${$_('version')}`;
+		} else {
+			return `${cityNameRome} (${population}) - Hokkaido Generator ${$_('version')}`;
+		}
 	}
 
 	function shareURL() {
