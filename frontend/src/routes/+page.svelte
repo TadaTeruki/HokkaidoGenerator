@@ -16,12 +16,13 @@
 	let isLoading = true;
 	let mapSet: MapSet | undefined = undefined;
 
-	$: if (mapSet)
+	function updateURL() {
 		history.replaceState(
 			null,
 			'',
 			`/?seed=${seed}&view3D=${view3D}&darkMode=${darkMode}&locale=${locale}`
 		);
+	}
 
 	onMount(() => {
 		initialSettingsStore.subscribe((initialSettings) => {
@@ -46,6 +47,7 @@
 				return;
 			}
 			mapSet = value;
+			updateURL();
 			isLoading = false;
 		});
 	});
