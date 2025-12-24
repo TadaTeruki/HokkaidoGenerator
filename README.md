@@ -86,8 +86,8 @@ source: https://github.com/TadaTeruki/fastlem
 
 [^1]: 山田秀三. 北海道の地名. 草風館, 2000.
 
-## ライセンス・権利表示
+## ライセンス
 
-ライセンス: MPL-2.0
+MPL-2.0
 
 Copyright 2024 Teruki TADA
