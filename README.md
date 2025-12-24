@@ -90,4 +90,4 @@ source: https://github.com/TadaTeruki/fastlem
 
 ライセンス: MPL-2.0
 
-Copyright (c) 2024 Teruki TADA
+Copyright 2024 Teruki TADA
