@@ -16,7 +16,7 @@
 	</header>
 	<slot />
 	<footer id="footer">
-		Copyright © 2024
+		© 2024
 		<a href="https://peruki.dev" target="_blank">Teruki TADA</a>
 	</footer>
 </div>
