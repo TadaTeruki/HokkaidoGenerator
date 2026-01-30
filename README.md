@@ -29,62 +29,44 @@ $ make
 
 ## 技術構成
 
-Rustで開発したシミュレータをWebAssemblyビルドし、TypeScript側で表示する形式。
+Rustで開発したシミュレータをWebAssemblyビルドし、TypeScript側で表示する形式です。
 
 ### フロントエンド
 
 言語: TypeScript <br>
 開発環境: Svelte + SvelteKit <br>
 
-地図の表示にはMaplibre GL JSを利用。
+地図の表示にはMaplibre GL JSを利用しています。
 
 ## 手法構成
 
 - **区画・交通網生成: 拡張L-system (に由来する生成アルゴリズム)**<br>
-Parish and Müller[^pm] に基づいた手法を、Sean Barrett[^barrett] による実装方針に合わせ実装しているもの。<br>
-実装の流れはRobin(phiresky)[^phi] の資料を参考としている。<br>
-source: https://github.com/TadaTeruki/street-engine
+Parish and Müller (2001) [^pm]を実装しています。
+[Sean Barrett のブログ記事](http://nothings.org/gamedev/l_systems.html)、
+[phireskyの資料](https://phiresky.github.io/procedural-cities/) を実装の参考としています。<br>
+source: https://github.com/TadaTeruki/street-engine/
 
-[^pm]: Parish, Yoav I. H., and Pascal Müller. 2001. “Procedural Modeling of Cities.” In Proceedings of the 28th Annual Conference on Computer Graphics and Interactive Techniques, 301–8. SIGGRAPH ’01. New York, NY, USA: ACM. https://doi.org/10.1145/383259.383292. 
+[^pm]: Parish, Y. I., & Müller, P. (2001). Procedural modeling of cities. Proceedings of the 28th Annual Conference on Computer Graphics and Interactive Techniques, 301–308.
 
-[^barrett]: Sean Barrett. 2008. “L-Systems Considered Harmful.” 2008. http://nothings.org/gamedev/l_systems.html. 
-
-[^phi]: https://phiresky.github.io/procedural-cities/
-
-- **地名生成: Markov連鎖**<br>
-既存地名を漢字ごとに分け、発音の繋がりで新しいパターンを組み上げる独自実装。<br>
-source: https://github.com/TadaTeruki/name-engine
+- **地名生成: マルコフ連鎖**<br>
+発音の繋がりで地名を組み上げる独自実装です。<br>
+source: https://github.com/TadaTeruki/name-engine/
 
 - **地形生成: Landscape Evolution Model**<br>
-Salève model[^analytical] を、 Cordonnier et al.[^large] の手法を取り入れつつ実装。<br>
-source: https://github.com/TadaTeruki/fastlem
+Steer (2021) [^analytical] と Cordonnier et al. (2016) [^large]を参考に実装しています。<br>
+source: https://github.com/TadaTeruki/fastlem/
 
-[^analytical]: Steer, P.: Short communication: Analytical models for 2D landscape evolution, Earth Surf. Dynam., 9, 1239–1250, https://doi.org/10.5194/esurf-9-1239-2021, 2021.
+[^analytical]: Steer, P. (2021). Analytical models for 2D landscape evolution. Earth Surface Dynamics Discussions, 2021, 1-17.
 
-[^large]: Guillaume Cordonnier, Jean Braun, Marie-Paule Cani, Bedrich Benes, Eric Galin, et al.. Large Scale Terrain Generation from Tectonic Uplift and Fluvial Erosion. Computer Graphics Forum, 2016, Proc. EUROGRAPHICS 2016, 35 (2), pp.165-175. ⟨10.1111/cgf.12820⟩. ⟨hal-01262376⟩
+[^large]: Cordonnier, G., Braun, J., Cani, M.-P., Benes, B., Galin, É., Peytavie, A., & Guérin, É. (2016). Large scale terrain generation from tectonic uplift and fluvial erosion. Computer Graphics Forum, 35(2), 165–175.
 
 ## 地名データセットについて
 
 [CSV file](./frontend/static/dataset/placenames.csv)
 
-地名の生成にあたり、
-以下のフォーマットに基づくCSV形式のデータセットを用いている。
+地名の生成にあたり用いるデータセットは、『北海道の地名』[^1] を参考としています。
 
-```
-[漢字],[読み(ローマ字)],[各漢字に対応する読み]
-```
-
-各地名は、『北海道の地名』[^1] を参照し、アイヌ語由来の地名を中心に抜粋。なお、漢字に対応する読みの分け方は、本データ作成者の判断に基づく。
-
-#### 例
-
-```
-琴似,kotoni,琴_koto:似_ni
-発寒,hassamu,発_has:寒_samu
-手稲,teine,手_te:稲_ine
-```
-
-[^1]: 山田秀三. 北海道の地名. 草風館, 2000.
+[^1]: 山田秀三. (2000). 北海道の地名. 草風館.
 
 ## ライセンス
 
